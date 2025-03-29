@@ -1,0 +1,21 @@
+services:
+  esmini:
+    build:
+      context: .
+      dockerfile: esmini.Dockerfile
+    entrypoint: sleep infinity
+    hostname: esmini
+    container_name: eba-esmini
+  autoware:
+    build:
+      context: .
+      dockerfile: autoware.Dockerfile
+    entrypoint: sleep infinity
+    environment:
+      - DISPLAY
+    hostname: autoware
+    container_name: eba-autoware
+    volumes:
+      - ./ros_ws:/ros_ws
+      - ./resources:/resources
+      - /tmp/.X11-unix:/tmp/.X11-unix
