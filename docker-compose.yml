@@ -6,6 +6,9 @@ services:
     entrypoint: sleep infinity
     hostname: esmini
     container_name: eba-esmini
+    volumes:
+      - ./esmini-ws:/esmini-ws
+      - /tmp/.X11-unix:/tmp/.X11-unix
   autoware:
     build:
       context: .

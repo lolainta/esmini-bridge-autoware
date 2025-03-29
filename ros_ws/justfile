@@ -1,0 +1,15 @@
+set shell := ["bash" , "-c"]
+
+activate := '. /autoware/install/setup.sh'
+
+launch map:
+  {{activate}} && \
+    ros2 launch autoware_launch \
+    planning_simulator.launch.xml \
+    map_path:=/resources/osm/ \
+    lanelet2_map_file:={{map}}.osm \
+    vehicle_model:=sample_vehicle \
+    sensor_model:=sample_sensor_kit
+
+sample:
+  {{activate}} && ros2 launch autoware_launch planning_simulator.launch.xml map_path:=$HOME/autoware_map/sample-map-planning vehicle_model:=sample_vehicle sensor_model:=sample_sensor_kit

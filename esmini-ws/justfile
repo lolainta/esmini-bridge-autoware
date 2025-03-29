@@ -1,0 +1,6 @@
+set shell := ["bash" , "-c"]
+
+ESMINI_PATH := "/esmini/"
+
+simulate xosc:
+  {{ESMINI_PATH}}/bin/esmini --window 60 60 800 400 --osc {{ESMINI_PATH}}/scripts/udp_driver/{{xosc}}.xosc --osi_receiver_ip 127.0.0.1
