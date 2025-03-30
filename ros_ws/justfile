@@ -8,7 +8,6 @@ source_ws := '. ./install/setup.sh'
 host := `echo $HOSTNAME`
 
 default:
-  echo $HOSTNAME
   [ $HOSTNAME = "autoware" ] && just launch crest-curve || exit 0
   [ $HOSTNAME = "esmini" ] && just run
 

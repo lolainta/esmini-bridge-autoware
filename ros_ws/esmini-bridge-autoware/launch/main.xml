@@ -1,4 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<launch>
-  <node pkg="esmini-bridge-autoware" exec="ego_init" name="ego_init" namespace="esmini_bridge_autoware" />
-</launch>
