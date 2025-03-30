@@ -1,9 +1,19 @@
 set shell := ["bash" , "-c"]
 
-activate := '. /autoware/install/setup.sh'
+activate_jazzy := '. /opt/ros/jazzy/setup.sh'
+activate_humble := '. /opt/ros/humble/setup.sh'
+activate_aw := '. /autoware/install/setup.sh'
+source_ws := '. ./install/setup.sh'
+
+host := `echo $HOSTNAME`
+
+default:
+  echo $HOSTNAME
+  [ $HOSTNAME = "autoware" ] && just launch crest-curve || exit 0
+  [ $HOSTNAME = "esmini" ] && just run
 
 launch map:
-  {{activate}} && \
+  {{activate_aw}} && \
     ros2 launch autoware_launch \
     planning_simulator.launch.xml \
     map_path:=/resources/osm/ \
@@ -12,4 +22,10 @@ launch map:
     sensor_model:=sample_sensor_kit
 
 sample:
-  {{activate}} && ros2 launch autoware_launch planning_simulator.launch.xml map_path:=$HOME/autoware_map/sample-map-planning vehicle_model:=sample_vehicle sensor_model:=sample_sensor_kit
+  {{activate_aw}} && ros2 launch autoware_launch planning_simulator.launch.xml map_path:=$HOME/autoware_map/sample-map-planning vehicle_model:=sample_vehicle sensor_model:=sample_sensor_kit
+
+build:
+  colcon build
+
+run: build
+  {{activate_jazzy}} && {{source_ws}} && ros2 launch esmini-bridge-autoware main.xml

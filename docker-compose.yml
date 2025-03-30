@@ -8,6 +8,7 @@ services:
     container_name: eba-esmini
     volumes:
       - ./esmini-ws:/esmini-ws
+      - ./ros_ws:/ros_ws
       - /tmp/.X11-unix:/tmp/.X11-unix
   autoware:
     build:

@@ -1,4 +1,4 @@
-FROM ubuntu:24.04
+FROM ros:jazzy
 
 RUN apt update
 
@@ -16,9 +16,12 @@ RUN apt install -y python3-protobuf
 
 RUN apt install -y just
 
+RUN apt install -y ccache ros-jazzy-rmw-cyclonedds-cpp
+RUN /usr/sbin/update-ccache-symlinks
 
 
-WORKDIR /esmini-ws
+
+WORKDIR /ros_ws
 
 ENTRYPOINT ["sleep", "infinity"]
 
