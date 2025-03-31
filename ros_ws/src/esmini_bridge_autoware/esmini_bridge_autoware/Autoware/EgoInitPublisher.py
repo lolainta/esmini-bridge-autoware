@@ -9,7 +9,7 @@ class EgoInitPublisher(Node):
         super().__init__("egoinit_publisher")
         self.logger = self.get_logger()
         self._init_publisher = self.create_publisher(
-            PoseWithCovarianceStamped, "/initialpose", 10
+            PoseWithCovarianceStamped, "/initialpose3d", 10
         )
         self._goal_publisher = self.create_publisher(
             PoseStamped, "/planning/mission_planning/goal", 10
@@ -29,8 +29,6 @@ class EgoInitPublisher(Node):
         msg = PoseStamped()
         msg.header.stamp = self.get_clock().now().to_msg()
         msg.header.frame_id = "map"
-        # .456665, y: -92.682770, z: 0.000000
-        # qx: 0.000000, qy: 0.000000, qz: -0.712069, qw: 0.702110
         msg.pose.position.x = 267.456665
         msg.pose.position.y = -92.682770
         msg.pose.orientation.z = -0.712069
