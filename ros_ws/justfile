@@ -27,4 +27,4 @@ build:
   colcon build
 
 run: build
-  {{activate_jazzy}} && {{source_ws}} && ros2 launch esmini-bridge-autoware main.xml
+  {{activate_jazzy}} && {{source_ws}} && cd /esmini/resources && ros2 run esmini_bridge_autoware esmini_bridge_autoware

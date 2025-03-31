@@ -3,9 +3,11 @@
 <package format="3">
   <name>esmini_bridge_autoware</name>
   <version>0.0.0</version>
-  <description>TODO: Package description</description>
+  <description>Bridge between ESmini and Autoware</description>
   <maintainer email="lolainta@gmail.com">LolaInTa Chi</maintainer>
   <license>Apache-2.0</license>
+
+  <depend>geometry_msgs</depend>
 
   <test_depend>ament_copyright</test_depend>
   <test_depend>ament_flake8</test_depend>

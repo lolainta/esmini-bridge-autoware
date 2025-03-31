@@ -20,7 +20,6 @@ RUN apt install -y ccache ros-jazzy-rmw-cyclonedds-cpp
 RUN /usr/sbin/update-ccache-symlinks
 
 
-
 WORKDIR /ros_ws
 
 ENTRYPOINT ["sleep", "infinity"]
