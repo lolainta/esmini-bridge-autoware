@@ -2,7 +2,7 @@ import ctypes
 
 from rclpy.node import Node
 
-from .Autoware.EgoInitPublisher import EgoInitPublisher
+from .Autoware.EgoInit import EgoInit
 from .SE.ObjectState import SEScenarioObjectState
 
 
@@ -20,9 +20,9 @@ class World(Node):
         timer_period = 0.1  # seconds
         self.timer = self.create_timer(timer_period, self.timer_callback)
 
-        self.ego_init_publisher = EgoInitPublisher()
+        self.ego_init = EgoInit()
 
-        self.init_pose()
+        self.start_autoware()
 
     def timer_callback(self):
         if self.se.SE_GetQuitFlag() != 0:
@@ -30,7 +30,7 @@ class World(Node):
             exit(0)
         self.se.SE_Step()
 
-    def init_pose(self):
+    def start_autoware(self):
         self.logger.info("Initializing Autoware")
         obj_state = SEScenarioObjectState()
         self.se.SE_GetObjectState(self.se.SE_GetId(0), ctypes.byref(obj_state))
@@ -38,4 +38,8 @@ class World(Node):
         print(
             f"id: {obj_state.id} (x,y,z) = ({obj_state.x}, {obj_state.y}, {obj_state.z})"
         )
-        self.ego_init_publisher.publish_initial_pose(obj_state.x, obj_state.y)
+        self.ego_init.publish_initial_pose(obj_state.x, obj_state.y)
+        self.ego_init.publish_goal_pose()  # hard coded destination
+        self.ego_init.switch_auto_mode()
+
+        self.logger.info("Success: Autoware start driving")

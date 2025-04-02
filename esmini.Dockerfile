@@ -15,6 +15,8 @@ RUN echo "deb [arch=all,$(dpkg --print-architecture) signed-by=/usr/share/keyrin
 RUN apt update
 RUN apt install -y just
 
+RUN apt install -y ros-humble-autoware-adapi-v1-msgs
+
 WORKDIR /ros_ws
 ENTRYPOINT ["sleep", "infinity"]
 

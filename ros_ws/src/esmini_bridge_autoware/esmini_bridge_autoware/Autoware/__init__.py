@@ -1,1 +1,1 @@
-from .EgoInitPublisher import EgoInitPublisher
+from .EgoInit import EgoInit
