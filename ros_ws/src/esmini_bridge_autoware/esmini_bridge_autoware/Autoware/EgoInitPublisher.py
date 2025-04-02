@@ -9,7 +9,7 @@ class EgoInitPublisher(Node):
         super().__init__("egoinit_publisher")
         self.logger = self.get_logger()
         self._init_publisher = self.create_publisher(
-            PoseWithCovarianceStamped, "/initialpose3d", 10
+            PoseWithCovarianceStamped, "/initialpose", 10
         )
         self._goal_publisher = self.create_publisher(
             PoseStamped, "/planning/mission_planning/goal", 10

@@ -1,7 +1,6 @@
 set shell := ["bash" , "-c"]
 
-activate_jazzy := '. /opt/ros/jazzy/setup.sh'
-activate_humble := '. /opt/ros/humble/setup.sh'
+activate_ros := '. /opt/ros/humble/setup.sh'
 activate_aw := '. /autoware/install/setup.sh'
 source_ws := '. ./install/setup.sh'
 
@@ -27,4 +26,4 @@ build:
   colcon build
 
 run: build
-  {{activate_jazzy}} && {{source_ws}} && cd /esmini/resources && ros2 run esmini_bridge_autoware esmini_bridge_autoware
+  {{activate_ros}} && {{source_ws}} && cd /esmini/resources && ros2 run esmini_bridge_autoware esmini_bridge_autoware
