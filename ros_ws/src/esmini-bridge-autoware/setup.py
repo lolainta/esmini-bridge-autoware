@@ -18,8 +18,6 @@ setup(
     license="Apache-2.0",
     tests_require=["pytest"],
     entry_points={
-        "console_scripts": [
-            "esmini_bridge_autoware = esmini_bridge_autoware.esmini_bridge_autoware:main"
-        ],
+        "console_scripts": ["esmini_bridge_autoware = src.esmini_bridge_autoware:main"],
     },
 )
