@@ -24,7 +24,7 @@ services:
     networks:
       - rosnet
     volumes:
-      - ./ros_ws:/ros_ws
+      - ./autoware_ws/:/autoware_ws
       - ./resources:/resources
       - /tmp/.X11-unix:/tmp/.X11-unix
 networks:

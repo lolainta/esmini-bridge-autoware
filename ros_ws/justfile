@@ -1,27 +1,10 @@
 set shell := ["bash" , "-c"]
 
 activate_ros := '. /opt/ros/humble/setup.sh'
-activate_aw := '. /autoware/install/setup.sh'
 source_ws := '. ./install/setup.sh'
 
-host := `echo $HOSTNAME`
-
 default:
-  [ $HOSTNAME = "autoware" ] && just launch crest-curve || exit 0
-  [ $HOSTNAME = "esmini" ] && just run
-
-launch map:
-  {{activate_aw}} && \
-    ros2 launch autoware_launch \
-    planning_simulator.launch.xml \
-    map_path:=/resources/osm/ \
-    lanelet2_map_file:={{map}}.osm \
-    vehicle_model:=sample_vehicle \
-    sensor_model:=sample_sensor_kit
-
-sample:
-  {{activate_aw}} && ros2 launch autoware_launch planning_simulator.launch.xml map_path:=$HOME/autoware_map/sample-map-planning vehicle_model:=sample_vehicle sensor_model:=sample_sensor_kit
-
+  just run
 
 deps:
   rosdep install --from-path src --ignore-src -y

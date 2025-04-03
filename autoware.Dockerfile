@@ -20,4 +20,4 @@ RUN echo "deb [arch=all,$(dpkg --print-architecture) signed-by=/usr/share/keyrin
 RUN apt update
 RUN apt install -y just
 
-WORKDIR /ros_ws
+WORKDIR /autoware_ws
