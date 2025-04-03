@@ -14,8 +14,7 @@ class EgoController(Node):
             self._subscriber_callback,
             10,
         )
+        self.velocity = 0
 
     def _subscriber_callback(self, msg):
-        self.logger.debug(f"Callback msg: {msg}")
-        velocity = msg.longitudinal.velocity
-        self.logger.info(f"Got longitudianl message: {velocity}")
+        self.velocity = msg.longitudinal.velocity

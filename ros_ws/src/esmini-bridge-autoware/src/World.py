@@ -18,7 +18,7 @@ class World(Node):
 
         self.logger.info(f"Loading {xosc}")
 
-        self.se.SE_Init(xosc.encode("ascii"), 0, 1, 0, 0)
+        self.se.SE_Init(xosc.encode("ascii"), 1, 1, 0, 0)
         timer_period = 0.1  # seconds
         self.timer = self.create_timer(timer_period, self.timer_callback)
 
@@ -30,6 +30,17 @@ class World(Node):
         if self.se.SE_GetQuitFlag() != 0:
             self.logger.info("Quit flag detected")
             exit(0)
+
+        self.se.SE_ReportObjectSpeed.argtypes = [ctypes.c_int, ctypes.c_float]
+
+        assert (
+            self.se.SE_ReportObjectSpeed(
+                self.se.SE_GetId(0),
+                float(self.ego_controller.velocity),
+            )
+            == 0
+        ), "SE_ReportObjectSpeed"
+
         self.se.SE_Step()
 
     def start_autoware(self):

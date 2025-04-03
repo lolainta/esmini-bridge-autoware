@@ -22,9 +22,15 @@ launch map:
 sample:
   {{activate_aw}} && ros2 launch autoware_launch planning_simulator.launch.xml map_path:=$HOME/autoware_map/sample-map-planning vehicle_model:=sample_vehicle sensor_model:=sample_sensor_kit
 
-build:
+
+deps:
   rosdep install --from-path src --ignore-src -y
+
+build: deps
   colcon build
 
 run: build
   {{activate_ros}} && {{source_ws}} && cd /esmini/resources && ros2 run esmini_bridge_autoware esmini_bridge_autoware
+
+debug: build
+  {{activate_ros}} && {{source_ws}} && cd /esmini/resources && ros2 run esmini_bridge_autoware esmini_bridge_autoware --ros-args --log-level DEBUG
