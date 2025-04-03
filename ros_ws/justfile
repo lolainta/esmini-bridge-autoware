@@ -1,6 +1,6 @@
 set shell := ["bash" , "-c"]
 
-activate_ros := '. /opt/ros/humble/setup.sh'
+source_ros := '. /opt/ros/humble/setup.sh'
 source_ws := '. ./install/setup.sh'
 
 default:
@@ -13,7 +13,7 @@ build: deps
   colcon build
 
 run: build
-  {{activate_ros}} && {{source_ws}} && cd /esmini/resources && ros2 run esmini_bridge_autoware esmini_bridge_autoware
+  {{source_ros}} && {{source_ws}} && cd /esmini/resources && ros2 run esmini_bridge_autoware esmini_bridge_autoware
 
 debug: build
-  {{activate_ros}} && {{source_ws}} && cd /esmini/resources && ros2 run esmini_bridge_autoware esmini_bridge_autoware --ros-args --log-level DEBUG
+  {{source_ros}} && {{source_ws}} && cd /esmini/resources && ros2 run esmini_bridge_autoware esmini_bridge_autoware --ros-args --log-level DEBUG
