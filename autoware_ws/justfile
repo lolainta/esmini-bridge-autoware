@@ -24,6 +24,9 @@ launch map:
     is_simulation:=true
 
 sample map:
+  yq e '\
+    ( .[] | select(.module == "planning" and .args.topic == "/planning/scenario_planning/trajectory") ).args.warn_rate = 3.0 \
+  ' -i /autoware/src/launcher/autoware_launch/autoware_launch/config/system/component_state_monitor/topics.yaml
   {{source_aw}} && ros2 launch autoware_launch \
     planning_simulator.launch.xml \
     map_path:=/resources/osm/ \
