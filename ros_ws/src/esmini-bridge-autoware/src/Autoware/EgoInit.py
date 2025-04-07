@@ -58,5 +58,7 @@ class EgoInit(Node):
                 self.logger.info("Switch mode success")
                 done = True
             else:
-                self.logger.info("Switch mode failed, retrying...")
+                self.logger.info(
+                    f"Switch mode failed with msg: {future.result().status.message}, retrying..."
+                )
                 time.sleep(1)

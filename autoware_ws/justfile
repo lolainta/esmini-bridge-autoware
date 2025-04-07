@@ -7,8 +7,24 @@ default:
   just launch crest-curve
 
 launch map:
-  {{source_aw}} && \
-    ros2 launch autoware_launch \
+  {{source_aw}} && ros2 launch autoware_launch \
+    autoware.launch.xml \
+    map_path:=/resources/osm/ \
+    lanelet2_map_file:={{map}}.osm \
+    vehicle_model:=sample_vehicle \
+    sensor_model:=sample_sensor_kit \
+    launch_sensing:=false \
+    launch_localization:=false \
+    launch_perception:=false \
+    launch_vehicle_interface:=false \
+    system_run_mode:=planning_simulation \
+    launch_system_monitor:=false \
+    launch_dummy_diag_publisher:=true \
+    diagnostic_graph_aggregator_graph_path:={{autoware_launch_pkg}}/config/system/diagnostics/autoware-main.yaml \
+    is_simulation:=true
+
+sample map:
+  {{source_aw}} && ros2 launch autoware_launch \
     planning_simulator.launch.xml \
     map_path:=/resources/osm/ \
     lanelet2_map_file:={{map}}.osm \
@@ -24,5 +40,3 @@ launch map:
     diagnostic_graph_aggregator_graph_path:={{autoware_launch_pkg}}/config/system/diagnostics/autoware-main.yaml \
     is_simulation:=true
 
-sample:
-  {{source_aw}} && ros2 launch autoware_launch planning_simulator.launch.xml map_path:=$HOME/autoware_map/sample-map-planning vehicle_model:=sample_vehicle sensor_model:=sample_sensor_kit

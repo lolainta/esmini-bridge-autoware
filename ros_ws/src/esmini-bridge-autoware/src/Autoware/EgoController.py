@@ -15,6 +15,11 @@ class EgoController(Node):
             10,
         )
         self.velocity = 0
+        self.angle = 0
+        self.rotation_rate = 0
 
     def _subscriber_callback(self, msg):
         self.velocity = msg.longitudinal.velocity
+        self.angle = msg.lateral.steering_tire_angle
+        self.rotation_rate = msg.lateral.steering_tire_rotation_rate
+        # self.logger.info(f"angle: {self.angle:.3f}, rotation_rate: {self.rotation_rate:.3f}")
