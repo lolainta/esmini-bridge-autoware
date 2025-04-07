@@ -41,10 +41,15 @@ class EgoInit(Node):
         msg = PoseStamped()
         msg.header.stamp = self.get_clock().now().to_msg()
         msg.header.frame_id = "map"
-        msg.pose.position.x = 267.456665
-        msg.pose.position.y = -92.682770
-        msg.pose.orientation.z = -0.712069
-        msg.pose.orientation.w = 0.702110
+        # msg.pose.position.x = 267.456665
+        # msg.pose.position.y = -92.682770
+        msg.pose.position.x = float(6.3)
+        msg.pose.position.y = float(273.735)
+        quat = quaternion_from_euler(0, 0, 1.57)
+        msg.pose.orientation.x = quat[0]
+        msg.pose.orientation.y = quat[1]
+        msg.pose.orientation.z = quat[2]
+        msg.pose.orientation.w = quat[3]
         self.logger.info(f"Publish goal {msg}")
         self._goal_publisher.publish(msg)
 

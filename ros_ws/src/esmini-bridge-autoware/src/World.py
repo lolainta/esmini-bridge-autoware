@@ -19,7 +19,7 @@ class World(Node):
 
         self.rm = ctypes.CDLL("/esmini/bin/libesminiRMLib.so")
 
-        xosc = "/esmini/scripts/udp_driver/one_car_on_road.xosc"
+        # xosc = "/esmini/scripts/udp_driver/one_car_on_road.xosc"
         xosc = "/esmini/resources/xosc/cut-in.xosc"
         # xosc = "/esmini/resources/xosc/lane_change_simple.xosc"
 
@@ -131,7 +131,7 @@ class World(Node):
         self.se.SE_GetObjectState(0, ctypes.byref(obj_state))
 
         ego_init.publish_initial_pose(obj_state.x, obj_state.y, obj_state.h)
-        # ego_init.publish_goal_pose()  # hard coded destination
-        # ego_init.switch_auto_mode()
+        ego_init.publish_goal_pose()  # hard coded destination
+        ego_init.switch_auto_mode()
 
         self.logger.info("Success: Autoware start driving")
