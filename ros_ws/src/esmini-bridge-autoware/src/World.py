@@ -20,7 +20,7 @@ class World(Node):
         self.rm = ctypes.CDLL("/esmini/bin/libesminiRMLib.so")
 
         xosc = "/esmini/scripts/udp_driver/one_car_on_road.xosc"
-        # xosc = "/esmini/resources/xosc/cut-in.xosc"
+        xosc = "/esmini/resources/xosc/cut-in.xosc"
         # xosc = "/esmini/resources/xosc/lane_change_simple.xosc"
 
         self.logger.info(f"Loading {xosc}")
@@ -110,9 +110,9 @@ class World(Node):
 
         vehicle_state = SESimpleVehicleState()
         self.se.SE_SimpleVehicleGetState(self.ego_handle, ctypes.byref(vehicle_state))
-        self.logger.info(
-            f"Got vehicle_state: {vehicle_state.x=:.3f}, {vehicle_state.y=:.3f}, {vehicle_state.speed=:.3f}"
-        )
+        # self.logger.info(
+        #     f"Got vehicle_state: {vehicle_state.x=:.3f}, {vehicle_state.y=:.3f}, {vehicle_state.speed=:.3f}"
+        # )
 
         self.se.SE_ReportObjectPosXYH(
             0, 0, vehicle_state.x, vehicle_state.y, vehicle_state.h
@@ -130,7 +130,7 @@ class World(Node):
         obj_state = SEScenarioObjectState()
         self.se.SE_GetObjectState(0, ctypes.byref(obj_state))
 
-        ego_init.publish_initial_pose(obj_state.x, obj_state.y)
+        ego_init.publish_initial_pose(obj_state.x, obj_state.y, obj_state.h)
         # ego_init.publish_goal_pose()  # hard coded destination
         # ego_init.switch_auto_mode()
 

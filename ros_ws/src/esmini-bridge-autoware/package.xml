@@ -8,6 +8,7 @@
   <license>Apache-2.0</license>
 
   <depend>geometry_msgs</depend>
+  <depend>tf_transformations</depend>
   <depend>autoware_adapi_v1_msgs</depend>
   <depend>autoware_control_msgs</depend>
 

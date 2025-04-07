@@ -1,6 +1,7 @@
 import time
 import rclpy
 from rclpy.node import Node
+from tf_transformations import quaternion_from_euler
 
 from geometry_msgs.msg import PoseWithCovarianceStamped, PoseStamped
 
@@ -22,12 +23,18 @@ class EgoInit(Node):
             "/api/operation_mode/change_to_autonomous",
         )
 
-    def publish_initial_pose(self, x, y):
+    def publish_initial_pose(self, x, y, h):
+        self.logger.info("heading: " + str(h))
         msg = PoseWithCovarianceStamped()
         msg.header.stamp = self.get_clock().now().to_msg()
         msg.header.frame_id = "map"
         msg.pose.pose.position.x = x
         msg.pose.pose.position.y = y
+        quat = quaternion_from_euler(0, 0, h)
+        msg.pose.pose.orientation.x = quat[0]
+        msg.pose.pose.orientation.y = quat[1]
+        msg.pose.pose.orientation.z = quat[2]
+        msg.pose.pose.orientation.w = quat[3]
         self._init_publisher.publish(msg)
 
     def publish_goal_pose(self):
