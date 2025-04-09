@@ -8,13 +8,16 @@ class World : public rclcpp::Node {
   public:
     World();
 
+    std::shared_ptr<AutowareHandler> get_ego() { return ego; }
+
   private:
+    std::shared_ptr<AutowareHandler> ego;
+
     rclcpp::TimerBase::SharedPtr timer_;
 
     void *vehicleHandle = 0;
     SE_SimpleVehicleState vehicleState = {0, 0, 0, 0, 0, 0, 0, 0};
     SE_ScenarioObjectState objectState;
-    std::unique_ptr<AutowareHandler> ego;
 
     void esmini_init();
     void timer_callback();

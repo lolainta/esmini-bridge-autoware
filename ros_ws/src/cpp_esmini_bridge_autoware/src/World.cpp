@@ -4,7 +4,7 @@
 #include <chrono>
 using namespace std::chrono_literals;
 
-World::World() : Node("EgoCreateNode") {
+World::World() : Node("World") {
     timer_ =
         this->create_wall_timer(10ms, std::bind(&World::timer_callback, this));
 
@@ -12,22 +12,29 @@ World::World() : Node("EgoCreateNode") {
 
     SE_ScenarioObjectState ego_state;
     SE_GetObjectState(0, &ego_state);
-    this->ego = std::make_unique<AutowareHandler>(ego_state.x, ego_state.y,
+    this->ego = std::make_shared<AutowareHandler>(ego_state.x, ego_state.y,
                                                   ego_state.h);
 }
 
 void World::esmini_init() {
     SE_Init("/esmini/resources/xosc/cut-in.xosc", 0, 1, 0, 0);
     SE_GetObjectState(0, &objectState);
-    vehicleHandle = SE_SimpleVehicleCreate(objectState.x, objectState.y,
-                                           objectState.h, 4.0, 0.0);
-    // SE_SimpleVehicleSteeringRate(vehicleHandle, 6.0f);
-    SE_ViewerShowFeature(4 + 8, true);
+    vehicleHandle =
+        SE_SimpleVehicleCreate(objectState.x, objectState.y, objectState.h,
+                               objectState.length, objectState.speed);
+    SE_SimpleVehicleSteeringRate(vehicleHandle, 9.0f);
+    SE_SimpleVehicleSetThrottleDisabled(vehicleHandle, true);
+    // SE_ViewerShowFeature(4 + 8, true);
 }
 
 void World::timer_callback() {
     float dt = SE_GetSimTimeStep();
-    SE_SimpleVehicleControlAnalog(vehicleHandle, dt, 0.1, 1);
+    SE_SimpleVehicleControlAnalog(vehicleHandle, dt, 0,
+                                  this->ego->get_rotation());
+    SE_SimpleVehicleSetSpeed(vehicleHandle, this->ego->get_velocity());
+    RCLCPP_INFO_THROTTLE(this->get_logger(), *this->get_clock(), 1000,
+                         "Throttle: %f, Rotation: %f",
+                         this->ego->get_velocity(), this->ego->get_rotation());
     SE_SimpleVehicleGetState(vehicleHandle, &vehicleState);
     SE_ReportObjectPosXYH(0, 0, vehicleState.x, vehicleState.y, vehicleState.h);
     SE_ReportObjectWheelStatus(0, vehicleState.wheel_rotation,

@@ -1,4 +1,7 @@
 #include "cpp_esmini_bridge_autoware/AutowareHandler.hpp"
+#include <chrono>
+
+using namespace std::chrono_literals;
 
 AutowareHandler::AutowareHandler(float x, float y, float h)
     : Node("AutowareHandler") {
@@ -11,6 +14,12 @@ AutowareHandler::AutowareHandler(float x, float y, float h)
     this->engage_autoware_client_ =
         this->create_client<autoware_adapi_v1_msgs::srv::ChangeOperationMode>(
             "/api/operation_mode/change_to_autonomous");
+
+    this->control_command_subscriber_ =
+        this->create_subscription<autoware_control_msgs::msg::Control>(
+            "/control/command/control_cmd", 10,
+            std::bind(&AutowareHandler::control_command_callback_, this,
+                      std::placeholders::_1));
 
     this->publish_initialpose_(x, y, h);
     this->publish_goalpose_(6.3, 273, 1.57);
@@ -46,13 +55,42 @@ void AutowareHandler::publish_goalpose_(float x, float y, float h) {
 }
 
 void AutowareHandler::engage_autoware_() {
-    auto request = std::make_shared<
-        autoware_adapi_v1_msgs::srv::ChangeOperationMode::Request>();
-    auto result = this->engage_autoware_client_->async_send_request(request);
-    if (rclcpp::spin_until_future_complete(this->get_node_base_interface(),
-                                           result) !=
-        rclcpp::FutureReturnCode::SUCCESS) {
-        RCLCPP_ERROR(this->get_logger(),
-                     "Failed to call service engage_autoware");
+    while (!this->engage_autoware_client_->wait_for_service(1s)) {
+        if (!rclcpp::ok()) {
+            RCLCPP_ERROR(this->get_logger(),
+                         "Interrupted while waiting for the service. Exiting.");
+            return;
+        }
+        RCLCPP_INFO(this->get_logger(),
+                    "Waiting for the service engage_autoware...");
     }
+    while (rclcpp::ok()) {
+        auto request = std::make_shared<
+            autoware_adapi_v1_msgs::srv::ChangeOperationMode::Request>();
+        auto future =
+            this->engage_autoware_client_->async_send_request(request);
+        if (rclcpp::spin_until_future_complete(this->get_node_base_interface(),
+                                               future) !=
+            rclcpp::FutureReturnCode::SUCCESS) {
+            RCLCPP_ERROR(this->get_logger(),
+                         "Failed to call service engage_autoware");
+            return;
+        }
+        auto response = future.get();
+        if (response->status.success) {
+            RCLCPP_INFO(this->get_logger(), "Engaged Autoware successfully");
+            break;
+
+        } else {
+            RCLCPP_ERROR(this->get_logger(), "Failed to engage Autoware %s",
+                         response->status.message.c_str());
+        }
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+    }
+}
+
+void AutowareHandler::control_command_callback_(
+    const autoware_control_msgs::msg::Control::SharedPtr msg) {
+    this->rotation = msg->lateral.steering_tire_angle;
+    this->velocity = msg->longitudinal.velocity;
 }
