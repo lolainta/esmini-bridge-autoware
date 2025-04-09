@@ -10,15 +10,25 @@ set(ESMINI_LIBRARY_DIR /esmini/bin)
 
 # find dependencies
 find_package(ament_cmake REQUIRED)
+find_package(geometry_msgs REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(autoware_adapi_v1_msgs REQUIRED)
 
-add_executable(esmini-bridge-autoware src/esmini-bridge-autoware.cpp src/world.cpp)
+add_executable(esmini-bridge-autoware
+  src/esmini-bridge-autoware.cpp
+  src/World.cpp
+  src/AutowareHandler.cpp
+)
 target_include_directories(esmini-bridge-autoware PUBLIC
   ${ESMINI_INCLUDE_DIR}
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>)
 target_compile_features(esmini-bridge-autoware PUBLIC c_std_99 cxx_std_17)  # Require C99 and C++17
-ament_target_dependencies(esmini-bridge-autoware rclcpp)
+ament_target_dependencies(esmini-bridge-autoware
+  rclcpp
+  geometry_msgs
+  autoware_adapi_v1_msgs
+)
 
 find_library(ESMINI_LIB esminiLib PATHS ${ESMINI_LIBRARY_DIR})
 target_link_libraries(esmini-bridge-autoware ${ESMINI_LIB})
@@ -42,4 +52,3 @@ if(BUILD_TESTING)
 endif()
 
 ament_package()
-

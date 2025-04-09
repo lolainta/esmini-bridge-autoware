@@ -1,14 +1,19 @@
-#include "cpp_esmini_bridge_autoware/world.hpp"
+#include "cpp_esmini_bridge_autoware/World.hpp"
+#include "cpp_esmini_bridge_autoware/AutowareHandler.hpp"
 #include "esminiLib.hpp"
 #include <chrono>
 using namespace std::chrono_literals;
 
 World::World() : Node("EgoCreateNode") {
-
     timer_ =
         this->create_wall_timer(10ms, std::bind(&World::timer_callback, this));
 
     this->esmini_init();
+
+    SE_ScenarioObjectState ego_state;
+    SE_GetObjectState(0, &ego_state);
+    this->ego = std::make_unique<AutowareHandler>(ego_state.x, ego_state.y,
+                                                  ego_state.h);
 }
 
 void World::esmini_init() {

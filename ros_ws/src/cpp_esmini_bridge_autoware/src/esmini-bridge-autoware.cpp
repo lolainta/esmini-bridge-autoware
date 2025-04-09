@@ -1,6 +1,6 @@
 #include <cstdio>
 
-#include <cpp_esmini_bridge_autoware/world.hpp>
+#include <cpp_esmini_bridge_autoware/World.hpp>
 
 int main(int argc, char **argv) {
     rclcpp::init(argc, argv);
