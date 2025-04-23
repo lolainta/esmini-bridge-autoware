@@ -43,8 +43,8 @@ AutowareHandler::AutowareHandler(float x, float y, float h)
 }
 
 void AutowareHandler::calc_imu_state_() {
-    // this->imu_state.linear_acceleration = linear_accel;
-    // this->imu_state.angular_velocity = angular_velocity;
+    this->imu_state.linear_acceleration = linear_accel;
+    this->imu_state.angular_velocity = angular_velocity;
     this->imu_state.header.stamp = this->now();
 }
 
