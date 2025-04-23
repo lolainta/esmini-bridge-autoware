@@ -22,7 +22,7 @@ AutowareHandler::AutowareHandler(float x, float y, float h)
                       std::placeholders::_1));
 
     this->publish_initialpose_(x, y, h);
-    this->publish_goalpose_(6.3, 273, 1.57);
+    this->publish_goalpose_(10.2, 299.6, 1.57);
     this->engage_autoware_();
 }
 

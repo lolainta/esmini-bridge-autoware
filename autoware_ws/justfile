@@ -4,7 +4,7 @@ source_aw := 'source /autoware/install/setup.bash'
 autoware_launch_pkg := shell(source_aw + " && ros2 pkg prefix autoware_launch --share")
 
 default:
-  just launch crest-curve
+  just launch e6mini_same
 
 launch map:
   {{source_aw}} && ros2 launch autoware_launch \
@@ -42,4 +42,3 @@ sample map:
     launch_dummy_diag_publisher:=true \
     diagnostic_graph_aggregator_graph_path:={{autoware_launch_pkg}}/config/system/diagnostics/autoware-main.yaml \
     is_simulation:=true
-

@@ -17,7 +17,8 @@ World::World() : Node("World") {
 }
 
 void World::esmini_init() {
-    SE_Init("/esmini/resources/xosc/cut-in.xosc", 0, 1, 0, 0);
+    // SE_Init("/esmini/resources/xosc/cut-in.xosc", 0, 1, 0, 0);
+    SE_Init("/resources/xosc/yusheng/145.xosc", 1, 1, 0, 0);
     SE_GetObjectState(0, &objectState);
     vehicleHandle =
         SE_SimpleVehicleCreate(objectState.x, objectState.y, objectState.h,
