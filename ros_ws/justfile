@@ -21,4 +21,4 @@ run: build
     ros2 run cpp_esmini_bridge_autoware esmini-bridge-autoware
 
 debug: build
-  {{source_ros}} && {{source_ws}} && cd /esmini/resources && ros2 run esmini_bridge_autoware esmini_bridge_autoware --ros-args --log-level DEBUG
+  {{source_ros}} && {{source_ws}} && cd /esmini/resources && ros2 run cpp_esmini_bridge_autoware esmini-bridge-autoware --ros-args --log-level DEBUG

@@ -28,6 +28,10 @@ AutowareHandler::AutowareHandler(float x, float y, float h)
         this->create_publisher<nav_msgs::msg::Odometry>(
             "/localization/kinematic_state", 10);
 
+    this->pub_predicted_objects_ =
+        this->create_publisher<autoware_perception_msgs::msg::PredictedObjects>(
+            "/perception/object_recognition/objects", 10);
+
     this->control_command_subscriber_ =
         this->create_subscription<autoware_control_msgs::msg::Control>(
             "/control/command/control_cmd", 10,
@@ -35,17 +39,50 @@ AutowareHandler::AutowareHandler(float x, float y, float h)
                       std::placeholders::_1));
 
     this->timer_ = this->create_wall_timer(
-        25ms, std::bind(&AutowareHandler::timer_callback, this));
+        10ms, std::bind(&AutowareHandler::timer_callback, this));
 
     this->publish_initialpose_(x, y, h);
-    this->publish_goalpose_(10.2, 299.6, 1.57);
-    this->engage_autoware_();
+    this->publish_goalpose_(6.5, 299.6, 1.57);
+
+    this->engage_timer_ = this->create_wall_timer(
+        1s, std::bind(&AutowareHandler::engage_autoware_, this));
+}
+
+void AutowareHandler::set_ego_state(float x, float y, float h) {
+    this->prev_ego_state2 = this->prev_ego_state;
+    this->prev_ego_state = this->ego_state;
+    this->ego_state.x = x;
+    this->ego_state.y = y;
+    this->ego_state.h = h;
+    this->ego_state.time = this->now().seconds();
 }
 
 void AutowareHandler::calc_imu_state_() {
-    this->imu_state.linear_acceleration = linear_accel;
+    float dt1 = this->now().seconds() - this->prev_ego_state.time;
+    float dt2 = this->prev_ego_state.time - this->prev_ego_state2.time;
+    float dt = (dt1 + dt2) / 2.0;
+
+    geometry_msgs::msg::Vector3 cur_v;
+    cur_v.x = (this->ego_state.x - this->prev_ego_state.x) / dt1;
+    cur_v.y = (this->ego_state.y - this->prev_ego_state.y) / dt1;
+    cur_v.z = 0.0;
+    geometry_msgs::msg::Vector3 prev_v;
+    prev_v.x = (this->prev_ego_state.x - this->prev_ego_state2.x) / dt2;
+    prev_v.y = (this->prev_ego_state.y - this->prev_ego_state2.y) / dt2;
+    prev_v.z = 0.0;
+    geometry_msgs::msg::Vector3 linear_acceleration;
+    linear_acceleration.x = (cur_v.x - prev_v.x) / dt;
+    linear_acceleration.y = (cur_v.y - prev_v.y) / dt;
+    linear_acceleration.z = 0.0;
+
+    geometry_msgs::msg::Vector3 angular_velocity;
+    angular_velocity.x = 0.0;
+    angular_velocity.y = 0.0;
+    angular_velocity.z = (this->ego_state.h - this->prev_ego_state.h) / dt;
+    this->imu_state.linear_acceleration = linear_acceleration;
     this->imu_state.angular_velocity = angular_velocity;
     this->imu_state.header.stamp = this->now();
+    this->imu_state.header.frame_id = "base_link";
 }
 
 void AutowareHandler::publish_initialpose_(float x, float y, float h) {
@@ -134,6 +171,9 @@ void AutowareHandler::publish_kinematic_state_() {
 }
 
 void AutowareHandler::engage_autoware_() {
+    if (this->engaged) {
+        return;
+    }
     while (!this->engage_autoware_client_->wait_for_service(1s)) {
         if (!rclcpp::ok()) {
             RCLCPP_ERROR(this->get_logger(),
@@ -143,29 +183,23 @@ void AutowareHandler::engage_autoware_() {
         RCLCPP_INFO(this->get_logger(),
                     "Waiting for the service engage_autoware...");
     }
-    while (rclcpp::ok()) {
-        auto request = std::make_shared<
-            autoware_adapi_v1_msgs::srv::ChangeOperationMode::Request>();
-        auto future =
-            this->engage_autoware_client_->async_send_request(request);
-        if (rclcpp::spin_until_future_complete(this->get_node_base_interface(),
-                                               future) !=
-            rclcpp::FutureReturnCode::SUCCESS) {
-            RCLCPP_ERROR(this->get_logger(),
-                         "Failed to call service engage_autoware");
-            return;
-        }
-        auto response = future.get();
-        if (response->status.success) {
-            RCLCPP_INFO(this->get_logger(), "Engaged Autoware successfully");
-            break;
-
-        } else {
-            RCLCPP_ERROR(this->get_logger(), "Failed to engage Autoware %s",
-                         response->status.message.c_str());
-        }
-        std::this_thread::sleep_for(std::chrono::seconds(1));
-    }
+    auto request = std::make_shared<
+        autoware_adapi_v1_msgs::srv::ChangeOperationMode::Request>();
+    auto future = this->engage_autoware_client_->async_send_request(
+        request,
+        [this](
+            rclcpp::Client<autoware_adapi_v1_msgs::srv::ChangeOperationMode>::
+                SharedFuture result) {
+            auto response = result.get();
+            if (response->status.success) {
+                RCLCPP_INFO(this->get_logger(),
+                            "Engaged Autoware successfully");
+                this->engaged = true;
+            } else {
+                RCLCPP_ERROR(this->get_logger(), "Failed: %s",
+                             response->status.message.c_str());
+            }
+        });
 }
 
 void AutowareHandler::control_command_callback_(
@@ -178,6 +212,12 @@ void AutowareHandler::timer_callback() {
     this->publish_steering_();
     this->publish_velocity_();
     this->calc_imu_state_();
+    RCLCPP_INFO_THROTTLE(this->get_logger(), *this->get_clock(), 1000,
+                         "Velocity: %f, Rotation: %f", this->velocity,
+                         this->rotation);
+    RCLCPP_INFO_THROTTLE(this->get_logger(), *this->get_clock(), 1000,
+                         "Ego State: %f, %f, %f", this->ego_state.x,
+                         this->ego_state.y, this->ego_state.h);
     this->publish_accel_();
     this->publish_tf_();
     // this->publish_pose_();

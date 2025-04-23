@@ -14,6 +14,7 @@ find_package(geometry_msgs REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(autoware_adapi_v1_msgs REQUIRED)
 find_package(autoware_control_msgs REQUIRED)
+find_package(autoware_perception_msgs REQUIRED)
 find_package(autoware_vehicle_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(tf2_msgs REQUIRED)
@@ -33,6 +34,7 @@ ament_target_dependencies(esmini-bridge-autoware
   geometry_msgs
   autoware_adapi_v1_msgs
   autoware_control_msgs
+  autoware_perception_msgs
   autoware_vehicle_msgs
   sensor_msgs
   tf2_msgs
