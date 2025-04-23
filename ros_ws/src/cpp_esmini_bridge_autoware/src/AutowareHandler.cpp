@@ -38,6 +38,14 @@ AutowareHandler::AutowareHandler(float x, float y, float h)
     this->engage_autoware_();
 }
 
+void AutowareHandler::set_imu_state_(
+    geometry_msgs::msg::Vector3 linear_accel,
+    geometry_msgs::msg::Vector3 angular_velocity) {
+    this->imu_state.linear_acceleration = linear_accel;
+    this->imu_state.angular_velocity = angular_velocity;
+    this->imu_state.header.stamp = this->now();
+}
+
 void AutowareHandler::publish_initialpose_(float x, float y, float h) {
     geometry_msgs::msg::PoseWithCovarianceStamped initialpose;
     initialpose.header.frame_id = "map";
@@ -85,8 +93,8 @@ void AutowareHandler::publish_accel_() {
     geometry_msgs::msg::AccelWithCovarianceStamped accel;
     accel.header.stamp = this->now();
     accel.header.frame_id = "base_link";
-    // accel.accel.accel.linear = acceleration;
-    // accel.accel.accel.angular = angular_velocity;
+    accel.accel.accel.linear = this->imu_state.linear_acceleration;
+    accel.accel.accel.angular = this->imu_state.angular_velocity;
     this->pub_accel_->publish(accel);
 }
 

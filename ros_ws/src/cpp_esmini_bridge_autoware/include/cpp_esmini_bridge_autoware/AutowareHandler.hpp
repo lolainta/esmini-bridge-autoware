@@ -8,7 +8,9 @@
 #include "geometry_msgs/msg/accel_with_covariance_stamped.hpp"
 #include "geometry_msgs/msg/pose_stamped.hpp"
 #include "geometry_msgs/msg/pose_with_covariance_stamped.hpp"
+#include "geometry_msgs/msg/vector3.hpp"
 #include "rclcpp/rclcpp.hpp"
+#include "sensor_msgs/msg/imu.hpp"
 
 class AutowareHandler : public rclcpp::Node {
   public:
@@ -19,6 +21,7 @@ class AutowareHandler : public rclcpp::Node {
 
   private:
     SE_ScenarioObjectState ego_state;
+    sensor_msgs::msg::Imu imu_state;
 
     float velocity = 0.0;
     float rotation = 0.0;
@@ -40,6 +43,9 @@ class AutowareHandler : public rclcpp::Node {
         control_command_subscriber_;
 
     rclcpp::TimerBase::SharedPtr timer_;
+
+    void set_imu_state_(geometry_msgs::msg::Vector3,
+                        geometry_msgs::msg::Vector3);
 
     void publish_initialpose_(float x, float y, float h);
     void publish_goalpose_(float x, float y, float h);

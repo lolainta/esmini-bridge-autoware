@@ -15,6 +15,7 @@ find_package(rclcpp REQUIRED)
 find_package(autoware_adapi_v1_msgs REQUIRED)
 find_package(autoware_control_msgs REQUIRED)
 find_package(autoware_vehicle_msgs REQUIRED)
+find_package(sensor_msgs REQUIRED)
 
 add_executable(esmini-bridge-autoware
   src/esmini-bridge-autoware.cpp
@@ -32,6 +33,7 @@ ament_target_dependencies(esmini-bridge-autoware
   autoware_adapi_v1_msgs
   autoware_control_msgs
   autoware_vehicle_msgs
+  sensor_msgs
 )
 
 find_library(ESMINI_LIB esminiLib PATHS ${ESMINI_LIBRARY_DIR})
