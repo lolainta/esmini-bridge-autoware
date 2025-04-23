@@ -20,6 +20,7 @@ AutowareHandler::AutowareHandler(float x, float y, float h)
     this->pub_velocity_status_ =
         this->create_publisher<autoware_vehicle_msgs::msg::VelocityReport>(
             "/vehicle/status/velocity_status", 10);
+    this->pub_tf_ = this->create_publisher<tf2_msgs::msg::TFMessage>("/tf", 10);
 
     this->control_command_subscriber_ =
         this->create_subscription<autoware_control_msgs::msg::Control>(
@@ -38,11 +39,9 @@ AutowareHandler::AutowareHandler(float x, float y, float h)
     this->engage_autoware_();
 }
 
-void AutowareHandler::set_imu_state_(
-    geometry_msgs::msg::Vector3 linear_accel,
-    geometry_msgs::msg::Vector3 angular_velocity) {
-    this->imu_state.linear_acceleration = linear_accel;
-    this->imu_state.angular_velocity = angular_velocity;
+void AutowareHandler::calc_imu_state_() {
+    // this->imu_state.linear_acceleration = linear_accel;
+    // this->imu_state.angular_velocity = angular_velocity;
     this->imu_state.header.stamp = this->now();
 }
 
@@ -98,6 +97,22 @@ void AutowareHandler::publish_accel_() {
     this->pub_accel_->publish(accel);
 }
 
+void AutowareHandler::publish_tf_() {
+    tf2_msgs::msg::TFMessage tf;
+    geometry_msgs::msg::TransformStamped transform;
+    transform.header.stamp = this->now();
+    transform.header.frame_id = "map";
+    transform.child_frame_id = "base_link";
+    transform.transform.translation.x = this->ego_state.x;
+    transform.transform.translation.y = this->ego_state.y;
+    transform.transform.rotation.x = 0.0;
+    transform.transform.rotation.y = 0.0;
+    transform.transform.rotation.z = sin(this->ego_state.h / 2);
+    transform.transform.rotation.w = cos(this->ego_state.h / 2);
+    tf.transforms.push_back(transform);
+    this->pub_tf_->publish(tf);
+}
+
 void AutowareHandler::engage_autoware_() {
     while (!this->engage_autoware_client_->wait_for_service(1s)) {
         if (!rclcpp::ok()) {
@@ -142,5 +157,9 @@ void AutowareHandler::control_command_callback_(
 void AutowareHandler::timer_callback() {
     this->publish_steering_();
     this->publish_velocity_();
+    this->calc_imu_state_();
     this->publish_accel_();
+    this->publish_tf_();
+    // this->publish_pose_();
+    // this->publish_kinematic_state_();
 }
