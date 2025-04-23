@@ -9,6 +9,7 @@
 #include "geometry_msgs/msg/pose_stamped.hpp"
 #include "geometry_msgs/msg/pose_with_covariance_stamped.hpp"
 #include "geometry_msgs/msg/vector3.hpp"
+#include "nav_msgs/msg/odometry.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "sensor_msgs/msg/imu.hpp"
 #include "tf2_msgs/msg/tf_message.hpp"
@@ -40,6 +41,7 @@ class AutowareHandler : public rclcpp::Node {
     rclcpp::Publisher<geometry_msgs::msg::AccelWithCovarianceStamped>::SharedPtr
         pub_accel_;
     rclcpp::Publisher<tf2_msgs::msg::TFMessage>::SharedPtr pub_tf_;
+    rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr pub_kinematic_state_;
 
     rclcpp::Subscription<autoware_control_msgs::msg::Control>::SharedPtr
         control_command_subscriber_;
@@ -54,6 +56,7 @@ class AutowareHandler : public rclcpp::Node {
     void publish_velocity_();
     void publish_accel_();
     void publish_tf_();
+    void publish_kinematic_state_();
 
     void engage_autoware_();
 

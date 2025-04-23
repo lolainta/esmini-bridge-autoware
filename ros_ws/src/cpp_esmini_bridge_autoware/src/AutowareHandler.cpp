@@ -21,15 +21,18 @@ AutowareHandler::AutowareHandler(float x, float y, float h)
         this->create_publisher<autoware_vehicle_msgs::msg::VelocityReport>(
             "/vehicle/status/velocity_status", 10);
     this->pub_tf_ = this->create_publisher<tf2_msgs::msg::TFMessage>("/tf", 10);
+    this->pub_accel_ =
+        this->create_publisher<geometry_msgs::msg::AccelWithCovarianceStamped>(
+            "/localization/acceleration", 10);
+    this->pub_kinematic_state_ =
+        this->create_publisher<nav_msgs::msg::Odometry>(
+            "/localization/kinematic_state", 10);
 
     this->control_command_subscriber_ =
         this->create_subscription<autoware_control_msgs::msg::Control>(
             "/control/command/control_cmd", 10,
             std::bind(&AutowareHandler::control_command_callback_, this,
                       std::placeholders::_1));
-    this->pub_accel_ =
-        this->create_publisher<geometry_msgs::msg::AccelWithCovarianceStamped>(
-            "/localization/acceleration", 10);
 
     this->timer_ = this->create_wall_timer(
         25ms, std::bind(&AutowareHandler::timer_callback, this));
@@ -113,6 +116,23 @@ void AutowareHandler::publish_tf_() {
     this->pub_tf_->publish(tf);
 }
 
+void AutowareHandler::publish_kinematic_state_() {
+    nav_msgs::msg::Odometry kinematic_state;
+    kinematic_state.header.stamp = this->now();
+    kinematic_state.header.frame_id = "map";
+    kinematic_state.child_frame_id = "base_link";
+    kinematic_state.pose.pose.position.x = this->ego_state.x;
+    kinematic_state.pose.pose.position.y = this->ego_state.y;
+    kinematic_state.pose.pose.position.z = 0.0;
+    kinematic_state.pose.pose.orientation.x = 0.0;
+    kinematic_state.pose.pose.orientation.y = 0.0;
+    kinematic_state.pose.pose.orientation.z = sin(this->ego_state.h / 2);
+    kinematic_state.pose.pose.orientation.w = cos(this->ego_state.h / 2);
+    kinematic_state.twist.twist.linear.x = this->velocity;
+    kinematic_state.twist.twist.angular.z = this->rotation;
+    this->pub_kinematic_state_->publish(kinematic_state);
+}
+
 void AutowareHandler::engage_autoware_() {
     while (!this->engage_autoware_client_->wait_for_service(1s)) {
         if (!rclcpp::ok()) {
@@ -161,5 +181,5 @@ void AutowareHandler::timer_callback() {
     this->publish_accel_();
     this->publish_tf_();
     // this->publish_pose_();
-    // this->publish_kinematic_state_();
+    this->publish_kinematic_state_();
 }
