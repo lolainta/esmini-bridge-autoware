@@ -14,12 +14,24 @@ AutowareHandler::AutowareHandler(float x, float y, float h)
     this->engage_autoware_client_ =
         this->create_client<autoware_adapi_v1_msgs::srv::ChangeOperationMode>(
             "/api/operation_mode/change_to_autonomous");
+    this->pub_steering_status_ =
+        this->create_publisher<autoware_vehicle_msgs::msg::SteeringReport>(
+            "/vehicle/status/steering_status", 10);
+    this->pub_velocity_status_ =
+        this->create_publisher<autoware_vehicle_msgs::msg::VelocityReport>(
+            "/vehicle/status/velocity_status", 10);
 
     this->control_command_subscriber_ =
         this->create_subscription<autoware_control_msgs::msg::Control>(
             "/control/command/control_cmd", 10,
             std::bind(&AutowareHandler::control_command_callback_, this,
                       std::placeholders::_1));
+    this->pub_accel_ =
+        this->create_publisher<geometry_msgs::msg::AccelWithCovarianceStamped>(
+            "/localization/acceleration", 10);
+
+    this->timer_ = this->create_wall_timer(
+        25ms, std::bind(&AutowareHandler::timer_callback, this));
 
     this->publish_initialpose_(x, y, h);
     this->publish_goalpose_(10.2, 299.6, 1.57);
@@ -52,6 +64,30 @@ void AutowareHandler::publish_goalpose_(float x, float y, float h) {
     goalpose.pose.orientation.z = sin(h / 2);
     goalpose.pose.orientation.w = cos(h / 2);
     this->goalpose_publisher_->publish(goalpose);
+}
+
+void AutowareHandler::publish_steering_() {
+    autoware_vehicle_msgs::msg::SteeringReport steering_report;
+    steering_report.stamp = this->now();
+    steering_report.steering_tire_angle = this->rotation;
+    this->pub_steering_status_->publish(steering_report);
+}
+
+void AutowareHandler::publish_velocity_() {
+    autoware_vehicle_msgs::msg::VelocityReport velocity_report;
+    velocity_report.header.stamp = this->now();
+    velocity_report.header.frame_id = "base_link";
+    velocity_report.longitudinal_velocity = this->velocity;
+    this->pub_velocity_status_->publish(velocity_report);
+}
+
+void AutowareHandler::publish_accel_() {
+    geometry_msgs::msg::AccelWithCovarianceStamped accel;
+    accel.header.stamp = this->now();
+    accel.header.frame_id = "base_link";
+    // accel.accel.accel.linear = acceleration;
+    // accel.accel.accel.angular = angular_velocity;
+    this->pub_accel_->publish(accel);
 }
 
 void AutowareHandler::engage_autoware_() {
@@ -93,4 +129,10 @@ void AutowareHandler::control_command_callback_(
     const autoware_control_msgs::msg::Control::SharedPtr msg) {
     this->rotation = msg->lateral.steering_tire_angle;
     this->velocity = msg->longitudinal.velocity;
+}
+
+void AutowareHandler::timer_callback() {
+    this->publish_steering_();
+    this->publish_velocity_();
+    this->publish_accel_();
 }
