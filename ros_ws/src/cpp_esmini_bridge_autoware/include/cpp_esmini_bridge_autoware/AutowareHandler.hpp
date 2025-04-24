@@ -2,9 +2,13 @@
 
 #include "autoware_adapi_v1_msgs/srv/change_operation_mode.hpp"
 #include "autoware_control_msgs/msg/control.hpp"
+#include "autoware_perception_msgs/msg/detected_objects.hpp"
 #include "autoware_perception_msgs/msg/predicted_objects.hpp"
+#include "autoware_vehicle_msgs/msg/control_mode_report.hpp"
+#include "autoware_vehicle_msgs/msg/gear_report.hpp"
 #include "autoware_vehicle_msgs/msg/steering_report.hpp"
 #include "autoware_vehicle_msgs/msg/velocity_report.hpp"
+#include "autoware_vehicle_msgs/srv/control_mode_command.hpp"
 #include "esminiLib.hpp"
 #include "geometry_msgs/msg/accel_with_covariance_stamped.hpp"
 #include "geometry_msgs/msg/pose_stamped.hpp"
@@ -36,6 +40,8 @@ class AutowareHandler : public rclcpp::Node {
     EgoState prev_ego_state2;
     sensor_msgs::msg::Imu imu_state;
 
+    autoware_perception_msgs::msg::PredictedObjects predicted_objects;
+
     float velocity = 0.0;
     float rotation = 0.0;
 
@@ -48,14 +54,21 @@ class AutowareHandler : public rclcpp::Node {
     rclcpp::Client<autoware_adapi_v1_msgs::srv::ChangeOperationMode>::SharedPtr
         engage_autoware_client_;
 
+    rclcpp::Publisher<autoware_vehicle_msgs::msg::ControlModeReport>::SharedPtr
+        pub_control_mode_;
+    rclcpp::Publisher<autoware_vehicle_msgs::msg::GearReport>::SharedPtr
+        pub_gear_report_;
     rclcpp::Publisher<autoware_vehicle_msgs::msg::SteeringReport>::SharedPtr
         pub_steering_status_;
     rclcpp::Publisher<autoware_vehicle_msgs::msg::VelocityReport>::SharedPtr
         pub_velocity_status_;
+
     rclcpp::Publisher<geometry_msgs::msg::AccelWithCovarianceStamped>::SharedPtr
         pub_accel_;
     rclcpp::Publisher<tf2_msgs::msg::TFMessage>::SharedPtr pub_tf_;
+    rclcpp::Publisher<sensor_msgs::msg::Imu>::SharedPtr pub_imu_state_;
     rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr pub_kinematic_state_;
+
     rclcpp::Publisher<autoware_perception_msgs::msg::PredictedObjects>::
         SharedPtr pub_predicted_objects_;
 
@@ -69,11 +82,17 @@ class AutowareHandler : public rclcpp::Node {
 
     void publish_initialpose_(float x, float y, float h);
     void publish_goalpose_(float x, float y, float h);
+
+    void publish_control_mode_();
+    void publish_gear_report_();
     void publish_steering_();
     void publish_velocity_();
     void publish_accel_();
+    void publish_imu_state_();
     void publish_tf_();
     void publish_kinematic_state_();
+
+    void publish_predicted_objects_();
 
     void engage_autoware_();
 

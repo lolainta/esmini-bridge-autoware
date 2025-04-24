@@ -7,13 +7,19 @@ AutowareHandler::AutowareHandler(float x, float y, float h)
     : Node("AutowareHandler") {
     this->initialpose_publisher_ =
         this->create_publisher<geometry_msgs::msg::PoseWithCovarianceStamped>(
-            "/initialpose", 10);
+            "/initialpose3d", 10);
     this->goalpose_publisher_ =
         this->create_publisher<geometry_msgs::msg::PoseStamped>(
             "/planning/mission_planning/goal", 10);
     this->engage_autoware_client_ =
         this->create_client<autoware_adapi_v1_msgs::srv::ChangeOperationMode>(
             "/api/operation_mode/change_to_autonomous");
+    this->pub_control_mode_ =
+        this->create_publisher<autoware_vehicle_msgs::msg::ControlModeReport>(
+            "/vehicle/status/control_mode", 10);
+    this->pub_gear_report_ =
+        this->create_publisher<autoware_vehicle_msgs::msg::GearReport>(
+            "/vehicle/status/gear_status", 10);
     this->pub_steering_status_ =
         this->create_publisher<autoware_vehicle_msgs::msg::SteeringReport>(
             "/vehicle/status/steering_status", 10);
@@ -21,6 +27,8 @@ AutowareHandler::AutowareHandler(float x, float y, float h)
         this->create_publisher<autoware_vehicle_msgs::msg::VelocityReport>(
             "/vehicle/status/velocity_status", 10);
     this->pub_tf_ = this->create_publisher<tf2_msgs::msg::TFMessage>("/tf", 10);
+    this->pub_imu_state_ = this->create_publisher<sensor_msgs::msg::Imu>(
+        "/sensing/imu/imu_data", 10);
     this->pub_accel_ =
         this->create_publisher<geometry_msgs::msg::AccelWithCovarianceStamped>(
             "/localization/acceleration", 10);
@@ -45,7 +53,7 @@ AutowareHandler::AutowareHandler(float x, float y, float h)
     this->publish_goalpose_(6.5, 299.6, 1.57);
 
     this->engage_timer_ = this->create_wall_timer(
-        1s, std::bind(&AutowareHandler::engage_autoware_, this));
+        100s, std::bind(&AutowareHandler::engage_autoware_, this));
 }
 
 void AutowareHandler::set_ego_state(float x, float y, float h) {
@@ -113,6 +121,21 @@ void AutowareHandler::publish_goalpose_(float x, float y, float h) {
     this->goalpose_publisher_->publish(goalpose);
 }
 
+void AutowareHandler::publish_control_mode_() {
+    autoware_vehicle_msgs::msg::ControlModeReport control_mode_report;
+    control_mode_report.stamp = this->now();
+    control_mode_report.mode =
+        autoware_vehicle_msgs::msg::ControlModeReport::AUTONOMOUS;
+    this->pub_control_mode_->publish(control_mode_report);
+}
+
+void AutowareHandler::publish_gear_report_() {
+    autoware_vehicle_msgs::msg::GearReport gear_report;
+    gear_report.stamp = this->now();
+    gear_report.report = autoware_vehicle_msgs::msg::GearReport::DRIVE;
+    this->pub_gear_report_->publish(gear_report);
+}
+
 void AutowareHandler::publish_steering_() {
     autoware_vehicle_msgs::msg::SteeringReport steering_report;
     steering_report.stamp = this->now();
@@ -153,6 +176,10 @@ void AutowareHandler::publish_tf_() {
     this->pub_tf_->publish(tf);
 }
 
+void AutowareHandler::publish_imu_state_() {
+    this->pub_imu_state_->publish(this->imu_state);
+}
+
 void AutowareHandler::publish_kinematic_state_() {
     nav_msgs::msg::Odometry kinematic_state;
     kinematic_state.header.stamp = this->now();
@@ -168,6 +195,12 @@ void AutowareHandler::publish_kinematic_state_() {
     kinematic_state.twist.twist.linear.x = this->velocity;
     kinematic_state.twist.twist.angular.z = this->rotation;
     this->pub_kinematic_state_->publish(kinematic_state);
+}
+
+void AutowareHandler::publish_predicted_objects_() {
+    autoware_perception_msgs::msg::PredictedObjects predicted_objects;
+    predicted_objects.header.stamp = this->now();
+    this->pub_predicted_objects_->publish(predicted_objects);
 }
 
 void AutowareHandler::engage_autoware_() {
@@ -209,17 +242,21 @@ void AutowareHandler::control_command_callback_(
 }
 
 void AutowareHandler::timer_callback() {
-    this->publish_steering_();
-    this->publish_velocity_();
-    this->calc_imu_state_();
     RCLCPP_INFO_THROTTLE(this->get_logger(), *this->get_clock(), 1000,
                          "Velocity: %f, Rotation: %f", this->velocity,
                          this->rotation);
     RCLCPP_INFO_THROTTLE(this->get_logger(), *this->get_clock(), 1000,
                          "Ego State: %f, %f, %f", this->ego_state.x,
                          this->ego_state.y, this->ego_state.h);
+    this->publish_control_mode_();
+    this->publish_gear_report_();
+    this->publish_steering_();
+    this->publish_velocity_();
+    this->calc_imu_state_();
     this->publish_accel_();
     this->publish_tf_();
+    this->publish_imu_state_();
     // this->publish_pose_();
     this->publish_kinematic_state_();
+    this->publish_predicted_objects_();
 }
