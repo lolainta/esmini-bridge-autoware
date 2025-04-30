@@ -17,6 +17,7 @@
 #include "nav_msgs/msg/odometry.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "sensor_msgs/msg/imu.hpp"
+#include "std_srvs/srv/trigger.hpp"
 #include "tf2_msgs/msg/tf_message.hpp"
 
 typedef struct EgoState {
@@ -28,13 +29,16 @@ typedef struct EgoState {
 
 class AutowareHandler : public rclcpp::Node {
   public:
-    AutowareHandler(float x, float y, float h);
+    AutowareHandler(float, float, float, float, float, float);
 
     float get_velocity() const { return velocity; }
     float get_rotation() const { return rotation; }
     void set_ego_state(float, float, float);
 
   private:
+    float init_x, init_y, init_h;
+    float goal_x, goal_y, goal_h;
+
     EgoState ego_state;
     EgoState prev_ego_state;
     EgoState prev_ego_state2;
@@ -66,14 +70,23 @@ class AutowareHandler : public rclcpp::Node {
     rclcpp::Publisher<geometry_msgs::msg::AccelWithCovarianceStamped>::SharedPtr
         pub_accel_;
     rclcpp::Publisher<tf2_msgs::msg::TFMessage>::SharedPtr pub_tf_;
+    rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr pub_pose_;
     rclcpp::Publisher<sensor_msgs::msg::Imu>::SharedPtr pub_imu_state_;
     rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr pub_kinematic_state_;
 
+    rclcpp::Publisher<autoware_perception_msgs::msg::DetectedObjects>::SharedPtr
+        pub_detected_objects_;
     rclcpp::Publisher<autoware_perception_msgs::msg::PredictedObjects>::
         SharedPtr pub_predicted_objects_;
 
     rclcpp::Subscription<autoware_control_msgs::msg::Control>::SharedPtr
         control_command_subscriber_;
+
+    rclcpp::Service<autoware_vehicle_msgs::srv::ControlModeCommand>::SharedPtr
+        srv_control_mode_command_;
+
+    rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr srv_publish_initialpose_;
+    rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr srv_publish_goalpose_;
 
     rclcpp::TimerBase::SharedPtr timer_;
     rclcpp::TimerBase::SharedPtr engage_timer_;
@@ -82,21 +95,37 @@ class AutowareHandler : public rclcpp::Node {
 
     void publish_initialpose_(float x, float y, float h);
     void publish_goalpose_(float x, float y, float h);
+    void publish_initialpose_callback_(
+        const std_srvs::srv::Trigger::Request::ConstSharedPtr,
+        std_srvs::srv::Trigger::Response::SharedPtr);
+    void publish_goalpose_callback_(
+        const std_srvs::srv::Trigger::Request::ConstSharedPtr,
+        std_srvs::srv::Trigger::Response::SharedPtr);
+    void engage_autoware_();
 
     void publish_control_mode_();
     void publish_gear_report_();
     void publish_steering_();
     void publish_velocity_();
+
     void publish_accel_();
-    void publish_imu_state_();
     void publish_tf_();
+    void publish_pose_();
+    void publish_imu_state_();
     void publish_kinematic_state_();
 
-    void publish_predicted_objects_();
-
-    void engage_autoware_();
+    void publish_objects_();
 
     void control_command_callback_(
         const autoware_control_msgs::msg::Control::SharedPtr msg);
+
+    // void control_mode_command_callback_(
+    //     const autoware_vehicle_msgs::srv::ControlModeCommand::Request::
+    //         SharedPtr,
+    //     autoware_vehicle_msgs::srv::ControlModeCommand::Response::SharedPtr);
+    void control_mode_command_callback_(
+        const autoware_vehicle_msgs::srv::ControlModeCommand::Request::
+            ConstSharedPtr,
+        autoware_vehicle_msgs::srv::ControlModeCommand::Response::SharedPtr);
     void timer_callback();
 };

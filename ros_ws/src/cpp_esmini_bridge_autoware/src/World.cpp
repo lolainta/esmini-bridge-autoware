@@ -10,8 +10,8 @@ World::World() : Node("World") {
     RCLCPP_INFO(this->get_logger(), "Esmini Initialized");
     SE_ScenarioObjectState ego_state;
     SE_GetObjectState(0, &ego_state);
-    this->ego = std::make_shared<AutowareHandler>(ego_state.x, ego_state.y,
-                                                  ego_state.h);
+    this->ego = std::make_shared<AutowareHandler>(
+        ego_state.x, ego_state.y, ego_state.h, 6.5, 299.6, 1.57);
     timer_ =
         this->create_wall_timer(10ms, std::bind(&World::timer_callback, this));
 }
@@ -33,7 +33,7 @@ void World::timer_callback() {
     SE_SimpleVehicleControlAnalog(vehicleHandle, dt, 0,
                                   this->ego->get_rotation());
     SE_SimpleVehicleSetSpeed(vehicleHandle, this->ego->get_velocity());
-    RCLCPP_INFO_THROTTLE(this->get_logger(), *this->get_clock(), 1000,
+    RCLCPP_INFO_THROTTLE(this->get_logger(), *this->get_clock(), 5000,
                          "Throttle: %f, Rotation: %f",
                          this->ego->get_velocity(), this->ego->get_rotation());
     SE_SimpleVehicleGetState(vehicleHandle, &vehicleState);
@@ -42,7 +42,7 @@ void World::timer_callback() {
                                vehicleState.wheel_angle);
     SE_ReportObjectSpeed(0, vehicleState.speed);
     SE_StepDT(dt);
-    RCLCPP_INFO_THROTTLE(this->get_logger(), *this->get_clock(), 1000,
+    RCLCPP_INFO_THROTTLE(this->get_logger(), *this->get_clock(), 5000,
                          "Vehicle State: %f, %f, %f", vehicleState.x,
                          vehicleState.y, vehicleState.h);
     this->ego->set_ego_state(vehicleState.x, vehicleState.y, vehicleState.h);

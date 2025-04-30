@@ -6,6 +6,19 @@ autoware_launch_pkg := shell(source_aw + " && ros2 pkg prefix autoware_launch --
 default:
   just launch e6mini_same
 
+build pkg:
+  rm -r /autoware/install/{{pkg}}
+  rm -r /autoware/build/{{pkg}}
+  {{source_aw}} && \
+    cd /autoware && \
+    colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release --packages-select {{pkg}}
+
+build_all:
+  {{source_aw}} && \
+    cd /autoware && \
+    colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release
+
+
 launch map:
   {{source_aw}} && ros2 launch autoware_launch \
     autoware.launch.xml \
@@ -21,9 +34,12 @@ launch map:
     launch_system_monitor:=false \
     launch_dummy_diag_publisher:=true \
     diagnostic_graph_aggregator_graph_path:={{autoware_launch_pkg}}/config/system/diagnostics/autoware-main.yaml \
+    enable_all_modules_auto_mode:=true \
     is_simulation:=true
 
 sample map:
+  just build tier4_simulator_launch
+  # just build autoware_launch
   yq e '\
     ( .[] | select(.module == "planning" and .args.topic == "/planning/scenario_planning/trajectory") ).args.warn_rate = 3.0 \
   ' -i /autoware/src/launcher/autoware_launch/autoware_launch/config/system/component_state_monitor/topics.yaml

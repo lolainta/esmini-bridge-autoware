@@ -17,6 +17,7 @@ find_package(autoware_control_msgs REQUIRED)
 find_package(autoware_perception_msgs REQUIRED)
 find_package(autoware_vehicle_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
+find_package(std_srvs REQUIRED)
 find_package(tf2_msgs REQUIRED)
 
 add_executable(esmini-bridge-autoware
@@ -37,6 +38,7 @@ ament_target_dependencies(esmini-bridge-autoware
   autoware_perception_msgs
   autoware_vehicle_msgs
   sensor_msgs
+  std_srvs
   tf2_msgs
 )
 
@@ -48,6 +50,10 @@ target_link_options(esmini-bridge-autoware PRIVATE
 
 install(TARGETS esmini-bridge-autoware
   DESTINATION lib/${PROJECT_NAME})
+
+install(DIRECTORY launch
+  DESTINATION share/${PROJECT_NAME}
+)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
