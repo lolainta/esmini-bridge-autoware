@@ -19,6 +19,7 @@ World::World() : Node("World") {
 void World::esmini_init() {
     // SE_Init("/esmini/resources/xosc/cut-in.xosc", 0, 1, 0, 0);
     SE_Init("/resources/xosc/yusheng/147.xosc", 1, 1, 0, 0);
+    // SE_Init("/resources/xosc/chengyu/SinD_test1.xosc", 1, 1, 0, 0);
     SE_GetObjectState(0, &objectState);
     vehicleHandle =
         SE_SimpleVehicleCreate(objectState.x, objectState.y, objectState.h,
@@ -37,6 +38,14 @@ void World::timer_callback() {
                          "Throttle: %f, Rotation: %f",
                          this->ego->get_velocity(), this->ego->get_rotation());
     SE_SimpleVehicleGetState(vehicleHandle, &vehicleState);
+    RCLCPP_INFO_THROTTLE(this->get_logger(), *this->get_clock(), 1000,
+                         "Number of objects: %d", SE_GetNumberOfObjects());
+    for (int i = 1; i < SE_GetNumberOfObjects(); i++) {
+        SE_ScenarioObjectState objectState;
+        SE_GetObjectState(SE_GetId(i), &objectState);
+        this->ego->set_object(objectState.id, objectState.x, objectState.y,
+                              objectState.h, objectState.speed);
+    }
     SE_ReportObjectPosXYH(0, 0, vehicleState.x, vehicleState.y, vehicleState.h);
     SE_ReportObjectWheelStatus(0, vehicleState.wheel_rotation,
                                vehicleState.wheel_angle);

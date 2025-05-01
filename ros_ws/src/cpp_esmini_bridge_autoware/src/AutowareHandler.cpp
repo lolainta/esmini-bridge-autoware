@@ -75,7 +75,7 @@ AutowareHandler::AutowareHandler(float init_x, float init_y, float init_h,
     this->publish_initialpose_(init_x, init_y, init_h);
     this->publish_goalpose_(goal_x, goal_y, goal_h);
     this->engage_timer_ = this->create_wall_timer(
-        5s, std::bind(&AutowareHandler::engage_autoware_, this));
+        10s, std::bind(&AutowareHandler::engage_autoware_, this));
 }
 
 void AutowareHandler::set_ego_state(float x, float y, float h) {
@@ -168,13 +168,9 @@ void AutowareHandler::publish_goalpose_callback_(
 }
 
 void AutowareHandler::engage_autoware_() {
-    // RCLCPP_INFO(this->get_logger(), "Engaging Autoware...");
     if (this->engaged) {
         return;
     }
-    // RCLCPP_INFO(this->get_logger(), "Publishing initialpose and
-    // goalpose...");
-
     while (!this->engage_autoware_client_->wait_for_service(1s)) {
         if (!rclcpp::ok()) {
             RCLCPP_ERROR(this->get_logger(),
@@ -293,17 +289,67 @@ void AutowareHandler::publish_kinematic_state_() {
     this->pub_kinematic_state_->publish(kinematic_state);
 }
 
+void AutowareHandler::set_object(int id, float x, float y, float h, float v) {
+    autoware_perception_msgs::msg::DetectedObject detect_obj;
+    autoware_perception_msgs::msg::PredictedObject predict_obj;
+    autoware_perception_msgs::msg::ObjectClassification classification;
+
+    classification.label =
+        autoware_perception_msgs::msg::ObjectClassification::CAR;
+
+    detect_obj.classification.push_back(classification);
+    detect_obj.kinematics.pose_with_covariance.pose.position.x = x;
+    detect_obj.kinematics.pose_with_covariance.pose.position.y = y;
+    detect_obj.kinematics.pose_with_covariance.pose.position.z = 0.0;
+    detect_obj.kinematics.pose_with_covariance.pose.orientation.x = 0.0;
+    detect_obj.kinematics.pose_with_covariance.pose.orientation.y = 0.0;
+    detect_obj.kinematics.pose_with_covariance.pose.orientation.z = sin(h / 2);
+    detect_obj.kinematics.pose_with_covariance.pose.orientation.w = cos(h / 2);
+    detect_obj.kinematics.twist_with_covariance.twist.linear.x = v;
+    detect_obj.shape.type = autoware_perception_msgs::msg::Shape::BOUNDING_BOX;
+    detect_obj.shape.dimensions.x = 4.5;
+    detect_obj.shape.dimensions.y = 2.0;
+    detect_obj.shape.dimensions.z = 1.5;
+    this->detected_objects_map[id] = detect_obj;
+
+    predict_obj.classification.push_back(classification);
+    predict_obj.kinematics.initial_pose_with_covariance.pose.position.x = x;
+    predict_obj.kinematics.initial_pose_with_covariance.pose.position.y = y;
+    predict_obj.kinematics.initial_pose_with_covariance.pose.position.z = 0.0;
+    predict_obj.kinematics.initial_pose_with_covariance.pose.orientation.x =
+        0.0;
+    predict_obj.kinematics.initial_pose_with_covariance.pose.orientation.y =
+        0.0;
+    predict_obj.kinematics.initial_pose_with_covariance.pose.orientation.z =
+        sin(h / 2);
+    predict_obj.kinematics.initial_pose_with_covariance.pose.orientation.w =
+        cos(h / 2);
+    predict_obj.kinematics.initial_twist_with_covariance.twist.linear.x = v;
+    predict_obj.kinematics.initial_twist_with_covariance.twist.linear.y = 0.0;
+    predict_obj.kinematics.initial_twist_with_covariance.twist.angular.z = 0.0;
+    predict_obj.shape.type = autoware_perception_msgs::msg::Shape::BOUNDING_BOX;
+    predict_obj.shape.dimensions.x = 4.5;
+    predict_obj.shape.dimensions.y = 2.0;
+    predict_obj.shape.dimensions.z = 1.5;
+    this->predicted_objects_map[id] = predict_obj;
+}
+
 void AutowareHandler::publish_objects_() {
-    autoware_perception_msgs::msg::DetectedObjects detected_objects;
     autoware_perception_msgs::msg::PredictedObjects predicted_objects;
     predicted_objects.header.stamp = this->now();
     predicted_objects.header.frame_id = "base_link";
+    for (auto &[i, obj] : this->predicted_objects_map) {
+        predicted_objects.objects.push_back(obj);
+    }
+    this->pub_predicted_objects_->publish(predicted_objects);
 
+    autoware_perception_msgs::msg::DetectedObjects detected_objects;
     detected_objects.header.stamp = this->now();
     detected_objects.header.frame_id = "base_link";
-
+    for (auto &[i, obj] : this->detected_objects_map) {
+        detected_objects.objects.push_back(obj);
+    }
     this->pub_detected_objects_->publish(detected_objects);
-    this->pub_predicted_objects_->publish(predicted_objects);
 }
 
 void AutowareHandler::control_command_callback_(

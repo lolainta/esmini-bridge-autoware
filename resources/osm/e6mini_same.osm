@@ -95307,8 +95307,8 @@
     <nd ref='9798' />
     <nd ref='9800' />
     <nd ref='9802' />
-    <tag k="type" v="line_thin"/>
-    <tag k="subtype" v="solid"/>
+    <tag k="type" v="line_thin" />
+    <tag k="subtype" v="solid" />
   </way>
   <way id='6871' visible='true' version='1'>
     <nd ref='6873' />
@@ -98247,8 +98247,8 @@
     <nd ref='12733' />
     <nd ref='12735' />
     <nd ref='12737' />
-    <tag k="type" v="line_thin"/>
-    <tag k="subtype" v="dashed"/>
+    <tag k="type" v="line_thin" />
+    <tag k="subtype" v="dashed" />
   </way>
   <way id='9806' visible='true' version='1'>
     <nd ref='9808' />
@@ -99717,8 +99717,8 @@
     <nd ref='12734' />
     <nd ref='12736' />
     <nd ref='12738' />
-    <tag k="type" v="line_thin"/>
-    <tag k="subtype" v="solid"/>
+    <tag k="type" v="line_thin" />
+    <tag k="subtype" v="solid" />
   </way>
   <way id='12740' visible='true' version='1'>
     <nd ref='12742' />
@@ -101187,8 +101187,8 @@
     <nd ref='15668' />
     <nd ref='15670' />
     <nd ref='15672' />
-    <tag k="type" v="line_thin"/>
-    <tag k="subtype" v="dashed"/>
+    <tag k="type" v="line_thin" />
+    <tag k="subtype" v="dashed" />
   </way>
   <way id='12741' visible='true' version='1'>
     <nd ref='12743' />
@@ -102657,8 +102657,8 @@
     <nd ref='15669' />
     <nd ref='15671' />
     <nd ref='15673' />
-    <tag k="type" v="line_thin"/>
-    <tag k="subtype" v="dashed"/>
+    <tag k="type" v="line_thin" />
+    <tag k="subtype" v="dashed" />
   </way>
   <way id='15675' visible='true' version='1'>
     <nd ref='15677' />
@@ -104127,8 +104127,8 @@
     <nd ref='18603' />
     <nd ref='18605' />
     <nd ref='18607' />
-    <tag k="type" v="line_thin"/>
-    <tag k="subtype" v="solid"/>
+    <tag k="type" v="line_thin" />
+    <tag k="subtype" v="solid" />
   </way>
   <way id='15676' visible='true' version='1'>
     <nd ref='15678' />
@@ -105597,8 +105597,8 @@
     <nd ref='18604' />
     <nd ref='18606' />
     <nd ref='18608' />
-    <tag k="type" v="line_thin"/>
-    <tag k="subtype" v="dashed"/>
+    <tag k="type" v="line_thin" />
+    <tag k="subtype" v="dashed" />
   </way>
   <!-- <relation id='-84' action='modify' visible='true'>
     <member type='way' ref='6870' role='right' />

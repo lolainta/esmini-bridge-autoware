@@ -1,8 +1,10 @@
 #pragma once
+#include <unordered_map>
 
 #include "autoware_adapi_v1_msgs/srv/change_operation_mode.hpp"
 #include "autoware_control_msgs/msg/control.hpp"
 #include "autoware_perception_msgs/msg/detected_objects.hpp"
+#include "autoware_perception_msgs/msg/object_classification.hpp"
 #include "autoware_perception_msgs/msg/predicted_objects.hpp"
 #include "autoware_vehicle_msgs/msg/control_mode_report.hpp"
 #include "autoware_vehicle_msgs/msg/gear_report.hpp"
@@ -34,6 +36,7 @@ class AutowareHandler : public rclcpp::Node {
     float get_velocity() const { return velocity; }
     float get_rotation() const { return rotation; }
     void set_ego_state(float, float, float);
+    void set_object(int, float, float, float, float);
 
   private:
     float init_x, init_y, init_h;
@@ -43,6 +46,11 @@ class AutowareHandler : public rclcpp::Node {
     EgoState prev_ego_state;
     EgoState prev_ego_state2;
     sensor_msgs::msg::Imu imu_state;
+
+    std::unordered_map<int, autoware_perception_msgs::msg::DetectedObject>
+        detected_objects_map;
+    std::unordered_map<int, autoware_perception_msgs::msg::PredictedObject>
+        predicted_objects_map;
 
     autoware_perception_msgs::msg::PredictedObjects predicted_objects;
 
@@ -93,8 +101,8 @@ class AutowareHandler : public rclcpp::Node {
 
     void calc_imu_state_();
 
-    void publish_initialpose_(float x, float y, float h);
-    void publish_goalpose_(float x, float y, float h);
+    void publish_initialpose_(float, float, float);
+    void publish_goalpose_(float, float, float);
     void publish_initialpose_callback_(
         const std_srvs::srv::Trigger::Request::ConstSharedPtr,
         std_srvs::srv::Trigger::Response::SharedPtr);
