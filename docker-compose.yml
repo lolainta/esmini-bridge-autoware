@@ -2,7 +2,7 @@ services:
   esmini:
     build:
       context: .
-      dockerfile: esmini.Dockerfile
+      dockerfile: esmini-ws.Dockerfile
     entrypoint: sleep infinity
     hostname: esmini
     container_name: eba-esmini
@@ -15,7 +15,7 @@ services:
   autoware:
     build:
       context: .
-      dockerfile: autoware.Dockerfile
+      dockerfile: autoware-ws.Dockerfile
     entrypoint: sleep infinity
     environment:
       - DISPLAY

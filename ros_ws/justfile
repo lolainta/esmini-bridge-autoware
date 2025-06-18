@@ -18,13 +18,13 @@ clean:
 
 run: build
   {{source_ros}} && {{source_aw}} && {{source_ws}} && \
-    cd /esmini/resources/xosc && \
     ros2 launch cpp_esmini_bridge_autoware main.yaml
 
 perception: build
   {{source_ros}} && {{source_ws}} && {{source_aw}} && \
-    cd /esmini/resources/xosc && \
     ros2 launch cpp_esmini_bridge_autoware main.yaml
 
 debug: build
-  {{source_ros}} && {{source_ws}} && cd /esmini/resources && ros2 run cpp_esmini_bridge_autoware esmini-bridge-autoware --ros-args --log-level DEBUG
+  {{source_ros}} && {{source_ws}} && \
+  ros2 run cpp_esmini_bridge_autoware esmini-bridge-autoware \
+    --ros-args --log-level DEBUG

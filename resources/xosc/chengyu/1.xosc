@@ -1,0 +1,385 @@
+<?xml version='1.0' encoding='utf-8'?>
+<OpenSCENARIO xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="OpenScenario.xsd">
+    <FileHeader description="hct_StraightCross-LeftTurn-ID_73_77" author="HCIS_ChengYuSheng"
+        revMajor="1" revMinor="0" date="2025-05-27T16:26:50.274060" />
+    <ParameterDeclarations>
+        <ParameterDeclaration name="Ego_connected" parameterType="boolean" value="false" />
+        <ParameterDeclaration name="Ego_Vehicle" parameterType="string" value="car_white" />
+        <ParameterDeclaration name="Ego_Speed" parameterType="double" value="17.846230664243723" />
+        <ParameterDeclaration name="Ego_S" parameterType="double" value="6" />
+        <ParameterDeclaration name="Agent1_Type" parameterType="string" value="car_red" />
+        <ParameterDeclaration name="Agent1_Speed" parameterType="double" value="9.768434716067901" />
+        <ParameterDeclaration name="Agent1_S" parameterType="double" value="2" />
+        <ParameterDeclaration name="Agent1_1_Delay" parameterType="double" value="0" />
+        <ParameterDeclaration name="Agent1_1_TA_DynamicDelay" parameterType="double" value="0" />
+        <ParameterDeclaration name="Agent1_1_TA_DynamicDuration" parameterType="double" value="12.5" />
+        <ParameterDeclaration name="Agent1_1_TA_DynamicShape" parameterType="string" value="Curve" />
+        <ParameterDeclaration name="Agent1_1_SA_EndSpeed" parameterType="double"
+            value="16.275834488607615" />
+        <ParameterDeclaration name="Agent1_1_SA_DynamicDelay" parameterType="double" value="0" />
+        <ParameterDeclaration name="Agent1_1_SA_DynamicDuration" parameterType="double" value="3" />
+        <ParameterDeclaration name="Agent1_1_SA_DynamicShape" parameterType="string" value="linear" />
+    </ParameterDeclarations>
+    <CatalogLocations>
+        <VehicleCatalog>
+            <Directory
+                path="./Catalogs/Vehicles" />
+        </VehicleCatalog>
+        <ControllerCatalog>
+            <Directory
+                path="./Catalogs/Controllers" />
+        </ControllerCatalog>
+    </CatalogLocations>
+    <RoadNetwork>
+        <LogicFile filepath="/resources/xodr/cr_file.xodr" />
+    </RoadNetwork>
+    <Entities>
+        <ScenarioObject name="Ego">
+            <CatalogReference catalogName="VehicleCatalog" entryName="$Ego_Vehicle" />
+            <ObjectController>
+                <CatalogReference catalogName="ControllerCatalog" entryName="ACCController" />
+            </ObjectController>
+        </ScenarioObject>
+        <ScenarioObject name="Agent1">
+            <CatalogReference catalogName="VehicleCatalog" entryName="$Agent1_Type" />
+        </ScenarioObject>
+    </Entities>
+    <Storyboard>
+        <Init>
+            <Actions>
+                <Private entityRef="Ego">
+                    <PrivateAction>
+                        <TeleportAction>
+                            <Position>
+                                <LanePosition roadId="36" laneId="-2" s="6.0" offset="0.0" />
+                            </Position>
+                        </TeleportAction>
+                    </PrivateAction>
+                    <PrivateAction>
+                        <LongitudinalAction>
+                            <SpeedAction>
+                                <SpeedActionDynamics dynamicsShape="step" value="0.0"
+                                    dynamicsDimension="time" />
+                                <SpeedActionTarget>
+                                    <AbsoluteTargetSpeed value="${$Ego_Speed / 3.6}" />
+                                </SpeedActionTarget>
+                            </SpeedAction>
+                        </LongitudinalAction>
+                    </PrivateAction>
+                    <PrivateAction>
+                        <ActivateControllerAction lateral="true" longitudinal="true" />
+                    </PrivateAction>
+                    <PrivateAction>
+                        <RoutingAction>
+                            <AcquirePositionAction>
+                                <Position>
+                                    <LanePosition roadId="21" laneId="-1" s="23.0" offset="0.0" />
+                                </Position>
+                            </AcquirePositionAction>
+                        </RoutingAction>
+                    </PrivateAction>
+                </Private>
+                <Private entityRef="Agent1">
+                    <PrivateAction>
+                        <TeleportAction>
+                            <Position>
+                                <LanePosition roadId="43" laneId="-2" s="$Agent1_S" offset="0.0" />
+                            </Position>
+                        </TeleportAction>
+                    </PrivateAction>
+                </Private>
+            </Actions>
+        </Init>
+        <Story name="story_act_maneuvuergroup_Agent1_Maneuver">
+            <Act name="act_maneuvuergroup_Agent1_Maneuver">
+                <ManeuverGroup name="maneuvuergroup_Agent1_Maneuver" maximumExecutionCount="1">
+                    <Actors selectTriggeringEntities="false">
+                        <EntityRef entityRef="Agent1" />
+                    </Actors>
+                    <Maneuver name="Agent1_Maneuver">
+                        <Event name="Agent1_StartSpeedEvent" priority="overwrite"
+                            maximumExecutionCount="1">
+                            <Action name="Agent1_StartSpeedAction">
+                                <PrivateAction>
+                                    <LongitudinalAction>
+                                        <SpeedAction>
+                                            <SpeedActionDynamics dynamicsShape="step" value="0.0"
+                                                dynamicsDimension="time" />
+                                            <SpeedActionTarget>
+                                                <AbsoluteTargetSpeed value="${$Agent1_Speed / 3.6}" />
+                                            </SpeedActionTarget>
+                                        </SpeedAction>
+                                    </LongitudinalAction>
+                                </PrivateAction>
+                            </Action>
+                            <StartTrigger>
+                                <ConditionGroup>
+                                    <Condition name="EgoApproachInitWp" delay="0.0"
+                                        conditionEdge="rising">
+                                        <ByEntityCondition>
+                                            <TriggeringEntities triggeringEntitiesRule="any">
+                                                <EntityRef entityRef="Ego" />
+                                            </TriggeringEntities>
+                                            <EntityCondition>
+                                                <ReachPositionCondition tolerance="2.0">
+                                                    <Position>
+                                                        <LanePosition roadId="36" laneId="-2"
+                                                            s="9.0" offset="0.0" />
+                                                    </Position>
+                                                </ReachPositionCondition>
+                                            </EntityCondition>
+                                        </ByEntityCondition>
+                                    </Condition>
+                                </ConditionGroup>
+                            </StartTrigger>
+                        </Event>
+                        <Event name="Agent1_Event1_DummyEvent" priority="parallel"
+                            maximumExecutionCount="1">
+                            <Action name="Agent1_Event1_DummyAction">
+                                <PrivateAction>
+                                    <VisibilityAction graphics="true" traffic="true" sensors="true" />
+                                </PrivateAction>
+                            </Action>
+                            <StartTrigger>
+                                <ConditionGroup>
+                                    <Condition name="FollowingPreviosTrigger"
+                                        delay="$Agent1_1_Delay" conditionEdge="rising">
+                                        <ByValueCondition>
+                                            <StoryboardElementStateCondition
+                                                storyboardElementType="event"
+                                                storyboardElementRef="Agent1_StartSpeedEvent"
+                                                state="completeState" />
+                                        </ByValueCondition>
+                                    </Condition>
+                                </ConditionGroup>
+                            </StartTrigger>
+                        </Event>
+                        <Event name="Agent1_Event1_TrajectoryEvent" priority="parallel"
+                            maximumExecutionCount="1">
+                            <Action name="Agent1_Event1_TrajectoryAction">
+                                <PrivateAction>
+                                    <RoutingAction>
+                                        <FollowTrajectoryAction>
+                                            <Trajectory name="selfDefineTrajectory" closed="false">
+                                                <Shape>
+                                                    <Nurbs order="4">
+                                                        <ControlPoint>
+                                                            <Position>
+                                                                <LanePosition roadId="43"
+                                                                    laneId="-2" s="2.0" offset="0.0" />
+                                                            </Position>
+                                                        </ControlPoint>
+                                                        <ControlPoint>
+                                                            <Position>
+                                                                <LanePosition roadId="43"
+                                                                    laneId="-2" s="2.0" offset="0.0" />
+                                                            </Position>
+                                                        </ControlPoint>
+                                                        <ControlPoint weight="0.5">
+                                                            <Position>
+                                                                <WorldPosition
+                                                                    x="13.502288059019577"
+                                                                    y="10.109076890311597" />
+                                                            </Position>
+                                                        </ControlPoint>
+                                                        <ControlPoint>
+                                                            <Position>
+                                                                <LanePosition roadId="29"
+                                                                    laneId="-2" s="0.0" offset="0.0" />
+                                                            </Position>
+                                                        </ControlPoint>
+                                                        <ControlPoint>
+                                                            <Position>
+                                                                <LanePosition roadId="29"
+                                                                    laneId="-2" s="18.0"
+                                                                    offset="0.0" />
+                                                            </Position>
+                                                        </ControlPoint>
+                                                        <Knot value="0" />
+                                                        <Knot value="0" />
+                                                        <Knot value="0" />
+                                                        <Knot value="0" />
+                                                        <Knot value="1" />
+                                                        <Knot value="2" />
+                                                        <Knot value="2" />
+                                                        <Knot value="2" />
+                                                        <Knot value="2" />
+                                                    </Nurbs>
+                                                </Shape>
+                                            </Trajectory>
+                                            <TimeReference>
+                                                <None />
+                                            </TimeReference>
+                                            <TrajectoryFollowingMode followingMode="position" />
+                                        </FollowTrajectoryAction>
+                                    </RoutingAction>
+                                </PrivateAction>
+                            </Action>
+                            <StartTrigger>
+                                <ConditionGroup>
+                                    <Condition name="FollowingPreviosTrigger"
+                                        delay="$Agent1_1_TA_DynamicDelay" conditionEdge="rising">
+                                        <ByValueCondition>
+                                            <StoryboardElementStateCondition
+                                                storyboardElementType="event"
+                                                storyboardElementRef="Agent1_Event1_DummyEvent"
+                                                state="completeState" />
+                                        </ByValueCondition>
+                                    </Condition>
+                                </ConditionGroup>
+                            </StartTrigger>
+                        </Event>
+                        <Event name="Agent1_SpeedEvent" priority="parallel"
+                            maximumExecutionCount="1">
+                            <Action name="Agent1_SpeedAction">
+                                <PrivateAction>
+                                    <LongitudinalAction>
+                                        <SpeedAction>
+                                            <SpeedActionDynamics
+                                                dynamicsShape="$Agent1_1_SA_DynamicShape"
+                                                value="$Agent1_1_SA_DynamicDuration"
+                                                dynamicsDimension="time" />
+                                            <SpeedActionTarget>
+                                                <AbsoluteTargetSpeed
+                                                    value="${$Agent1_1_SA_EndSpeed/3.6}" />
+                                            </SpeedActionTarget>
+                                        </SpeedAction>
+                                    </LongitudinalAction>
+                                </PrivateAction>
+                            </Action>
+                            <StartTrigger>
+                                <ConditionGroup>
+                                    <Condition name="FollowingPreviosTrigger"
+                                        delay="$Agent1_1_SA_DynamicDelay" conditionEdge="rising">
+                                        <ByValueCondition>
+                                            <StoryboardElementStateCondition
+                                                storyboardElementType="event"
+                                                storyboardElementRef="Agent1_Event1_DummyEvent"
+                                                state="completeState" />
+                                        </ByValueCondition>
+                                    </Condition>
+                                </ConditionGroup>
+                            </StartTrigger>
+                        </Event>
+                    </Maneuver>
+                </ManeuverGroup>
+                <StartTrigger>
+                    <ConditionGroup>
+                        <Condition name="act_start" delay="0.0" conditionEdge="rising">
+                            <ByValueCondition>
+                                <SimulationTimeCondition value="0.0" rule="greaterThan" />
+                            </ByValueCondition>
+                        </Condition>
+                    </ConditionGroup>
+                </StartTrigger>
+                <StopTrigger />
+            </Act>
+        </Story>
+        <Story name="story_act_maneuvuergroup_DetectEgoHasMovedManeuver">
+            <Act name="act_maneuvuergroup_DetectEgoHasMovedManeuver">
+                <ManeuverGroup name="maneuvuergroup_DetectEgoHasMovedManeuver"
+                    maximumExecutionCount="1">
+                    <Actors selectTriggeringEntities="false">
+                        <EntityRef entityRef="Ego" />
+                    </Actors>
+                    <Maneuver name="DetectEgoHasMovedManeuver">
+                        <Event name="DetectEgoHasMovedEvent" priority="parallel"
+                            maximumExecutionCount="1">
+                            <Action name="Set EgoHasMoved Flag">
+                                <GlobalAction>
+                                    <ParameterAction parameterRef="Ego_connected">
+                                        <SetAction value="true" />
+                                    </ParameterAction>
+                                </GlobalAction>
+                            </Action>
+                            <StartTrigger>
+                                <ConditionGroup>
+                                    <Condition name="EgoHasMovedTrigger" delay="0.0"
+                                        conditionEdge="rising">
+                                        <ByEntityCondition>
+                                            <TriggeringEntities triggeringEntitiesRule="any">
+                                                <EntityRef entityRef="Ego" />
+                                            </TriggeringEntities>
+                                            <EntityCondition>
+                                                <SpeedCondition value="0.0" rule="greaterThan" />
+                                            </EntityCondition>
+                                        </ByEntityCondition>
+                                    </Condition>
+                                </ConditionGroup>
+                            </StartTrigger>
+                        </Event>
+                    </Maneuver>
+                </ManeuverGroup>
+                <StartTrigger>
+                    <ConditionGroup>
+                        <Condition name="act_start" delay="0.0" conditionEdge="rising">
+                            <ByValueCondition>
+                                <SimulationTimeCondition value="0.0" rule="greaterThan" />
+                            </ByValueCondition>
+                        </Condition>
+                    </ConditionGroup>
+                </StartTrigger>
+                <StopTrigger />
+            </Act>
+        </Story>
+        <StopTrigger>
+            <ConditionGroup>
+                <Condition name="EgoApproachEndWp" delay="0.0" conditionEdge="rising">
+                    <ByEntityCondition>
+                        <TriggeringEntities triggeringEntitiesRule="any">
+                            <EntityRef entityRef="Ego" />
+                        </TriggeringEntities>
+                        <EntityCondition>
+                            <ReachPositionCondition tolerance="2.0">
+                                <Position>
+                                    <LanePosition roadId="21" laneId="-1" s="23.0" offset="0.0" />
+                                </Position>
+                            </ReachPositionCondition>
+                        </EntityCondition>
+                    </ByEntityCondition>
+                </Condition>
+            </ConditionGroup>
+            <ConditionGroup>
+                <Condition name="AllEventComplete" delay="5.0" conditionEdge="none">
+                    <ByValueCondition>
+                        <StoryboardElementStateCondition storyboardElementType="event"
+                            storyboardElementRef="Agent1_Event1_TrajectoryEvent"
+                            state="completeState" />
+                    </ByValueCondition>
+                </Condition>
+                <Condition name="AllEventComplete" delay="5.0" conditionEdge="none">
+                    <ByValueCondition>
+                        <StoryboardElementStateCondition storyboardElementType="event"
+                            storyboardElementRef="Agent1_SpeedEvent" state="completeState" />
+                    </ByValueCondition>
+                </Condition>
+            </ConditionGroup>
+            <ConditionGroup>
+                <Condition name="EgoStandStill" delay="0.0" conditionEdge="none">
+                    <ByEntityCondition>
+                        <TriggeringEntities triggeringEntitiesRule="any">
+                            <EntityRef entityRef="Ego" />
+                        </TriggeringEntities>
+                        <EntityCondition>
+                            <StandStillCondition duration="10.0" />
+                        </EntityCondition>
+                    </ByEntityCondition>
+                </Condition>
+                <Condition name="egoHasMoved" delay="0.0" conditionEdge="none">
+                    <ByValueCondition>
+                        <ParameterCondition parameterRef="Ego_connected" value="true" rule="equalTo" />
+                    </ByValueCondition>
+                </Condition>
+            </ConditionGroup>
+            <ConditionGroup>
+                <Condition name="AllStartEventTriggered" delay="20.0" conditionEdge="rising">
+                    <ByValueCondition>
+                        <StoryboardElementStateCondition storyboardElementType="event"
+                            storyboardElementRef="Agent1_StartSpeedEvent" state="completeState" />
+                    </ByValueCondition>
+                </Condition>
+            </ConditionGroup>
+        </StopTrigger>
+    </Storyboard>
+</OpenSCENARIO>

@@ -56,7 +56,6 @@ class AutowareHandler : public rclcpp::Node {
 
     float velocity = 0.0;
     float rotation = 0.0;
-
     bool engaged = false;
 
     rclcpp::Publisher<geometry_msgs::msg::PoseWithCovarianceStamped>::SharedPtr

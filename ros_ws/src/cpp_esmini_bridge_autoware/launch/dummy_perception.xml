@@ -9,7 +9,8 @@
     <group>
         <push-ros-namespace namespace="simulation" />
         <group if="$(var real)">
-            <node pkg="dummy_perception_publisher" exec="dummy_perception_publisher_node"
+            <node pkg="autoware_dummy_perception_publisher"
+                exec="autoware_dummy_perception_publisher_node"
                 name="dummy_perception_publisher" output="screen">
                 <remap from="output/dynamic_object"
                     to="/perception/object_recognition/detection/labeled_clusters" />
@@ -35,7 +36,8 @@
             </include>
         </group>
         <group unless="$(var real)">
-            <node pkg="dummy_perception_publisher" exec="dummy_perception_publisher_node"
+            <node pkg="autoware_dummy_perception_publisher"
+                exec="autoware_dummy_perception_publisher_node"
                 name="dummy_perception_publisher" output="screen">
                 <remap from="output/dynamic_object"
                     to="/perception/object_recognition/detection/objects_with_feature" />

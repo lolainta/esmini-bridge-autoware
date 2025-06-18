@@ -12,14 +12,19 @@ World::World() : Node("World") {
     SE_GetObjectState(0, &ego_state);
     this->ego = std::make_shared<AutowareHandler>(
         ego_state.x, ego_state.y, ego_state.h, 6.5, 299.6, 1.57);
+    // this->ego = std::make_shared<AutowareHandler>(
+    //     ego_state.x, ego_state.y, ego_state.h, 52.5, 11.6, 6.28);
     timer_ =
         this->create_wall_timer(10ms, std::bind(&World::timer_callback, this));
 }
 
 void World::esmini_init() {
     // SE_Init("/esmini/resources/xosc/cut-in.xosc", 0, 1, 0, 0);
-    SE_Init("/resources/xosc/yusheng/147.xosc", 1, 1, 0, 0);
     // SE_Init("/resources/xosc/chengyu/SinD_test1.xosc", 1, 1, 0, 0);
+    SE_AddPath("/esmini/resources/xosc/");
+    SE_Init("/resources/xosc/yusheng/148.xosc", 1, 1, 0, 1);
+    // SE_Init("/resources/xosc/chengyu/1.xosc", 1, 1, 0, 1);
+    SE_CollisionDetection(true);
     SE_GetObjectState(0, &objectState);
     vehicleHandle =
         SE_SimpleVehicleCreate(objectState.x, objectState.y, objectState.h,
@@ -43,6 +48,10 @@ void World::timer_callback() {
     for (int i = 1; i < SE_GetNumberOfObjects(); i++) {
         SE_ScenarioObjectState objectState;
         SE_GetObjectState(SE_GetId(i), &objectState);
+        RCLCPP_INFO_THROTTLE(this->get_logger(), *this->get_clock(), 1000,
+                             "Object %d: %f, %f, %f, Speed: %f", objectState.id,
+                             objectState.x, objectState.y, objectState.h,
+                             objectState.speed);
         this->ego->set_object(objectState.id, objectState.x, objectState.y,
                               objectState.h, objectState.speed);
     }
