@@ -1,12 +1,6 @@
-FROM eba-autoware
+FROM tonychi/eba-autoware:latest
 
-RUN <<EOF
-wget -qO - 'https://proget.makedeb.org/debian-feeds/prebuilt-mpr.pub' | gpg --dearmor | tee /usr/share/keyrings/prebuilt-mpr-archive-keyring.gpg 1> /dev/null
-echo "deb [arch=all,$(dpkg --print-architecture) signed-by=/usr/share/keyrings/prebuilt-mpr-archive-keyring.gpg] https://proget.makedeb.org prebuilt-mpr $(lsb_release -cs)" | tee /etc/apt/sources.list.d/prebuilt-mpr.list
-apt-get update
-apt-get install -y --no-install-recommends just
-rm -rf /var/lib/apt/lists/*
-EOF
+RUN curl --proto '=https' --tlsv1.2 -sSf https://just.systems/install.sh | bash -s -- --to /usr/local/bin/
 
 ENV YQ_VERSION=v4.2.0
 ENV YQ_BINARY=yq_linux_amd64
@@ -16,6 +10,6 @@ tar xz
 mv ${YQ_BINARY} /usr/bin/yq
 EOF
 
-COPY ./resources /resources
-COPY ./autoware_ws /autoware_ws
+#COPY ./resources /resources
+#COPY ./autoware_ws /autoware_ws
 WORKDIR /autoware_ws
