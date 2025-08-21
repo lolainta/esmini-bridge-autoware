@@ -86,7 +86,7 @@ class AutowareHandler : public rclcpp::Node {
         SharedPtr pub_predicted_objects_;
 
     rclcpp::Subscription<autoware_control_msgs::msg::Control>::SharedPtr
-        control_command_subscriber_;
+        sub_control_command_;
 
     rclcpp::Service<autoware_vehicle_msgs::srv::ControlModeCommand>::SharedPtr
         srv_control_mode_command_;

@@ -45,7 +45,7 @@ AutowareHandler::AutowareHandler(float init_x, float init_y, float init_h,
         this->create_publisher<autoware_perception_msgs::msg::PredictedObjects>(
             "/perception/object_recognition/objects", 10);
 
-    this->control_command_subscriber_ =
+    this->sub_control_command_ =
         this->create_subscription<autoware_control_msgs::msg::Control>(
             "/control/command/control_cmd", 10,
             std::bind(&AutowareHandler::control_command_callback_, this,
