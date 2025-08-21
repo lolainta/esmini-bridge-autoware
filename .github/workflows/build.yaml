@@ -9,7 +9,7 @@ jobs:
     runs-on: self-hosted
     environment: Build
     env:
-      DOCKER_IMAGE_NAME: tonychi/eba-autoware
+      DOCKER_IMAGE_NAME: ${{ secrets.DOCKER_USERNAME }}/eba-autoware
 
     steps:
       - name: Checkout
@@ -47,7 +47,7 @@ jobs:
     environment: Build
     needs: build-and-push-eba-autoware
     env:
-      DOCKER_IMAGE_NAME: tonychi/esmini-bridge-autoware-esmini
+      DOCKER_IMAGE_NAME: ${{ secrets.DOCKER_USERNAME }}/esmini-bridge-autoware-esmini
 
     steps:
       - name: Checkout
@@ -85,7 +85,7 @@ jobs:
     environment: Build
     needs: build-and-push-eba-autoware
     env:
-      DOCKER_IMAGE_NAME: tonychi/esmini-bridge-autoware-autoware
+      DOCKER_IMAGE_NAME: ${{ secrets.DOCKER_USERNAME }}/esmini-bridge-autoware-autoware
 
     steps:
       - name: Checkout
