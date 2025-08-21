@@ -4,7 +4,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 RUN <<EOF
 apt-get update
-apt-get full-upgrade
+apt-get -y full-upgrade
 apt-get install -y --no-install-recommends software-properties-common curl lsb-release
 apt-get install -y --no-install-recommends git python3-pip
 pip install -U vcstool
