@@ -37,6 +37,7 @@ class AutowareHandler : public rclcpp::Node {
     float get_rotation() const { return rotation; }
     void set_ego_state(float, float, float);
     void set_object(int, float, float, float, float);
+    bool is_engaged() const { return engaged; }
 
   private:
     float init_x, init_y, init_h;
@@ -126,10 +127,6 @@ class AutowareHandler : public rclcpp::Node {
     void control_command_callback_(
         const autoware_control_msgs::msg::Control::SharedPtr msg);
 
-    // void control_mode_command_callback_(
-    //     const autoware_vehicle_msgs::srv::ControlModeCommand::Request::
-    //         SharedPtr,
-    //     autoware_vehicle_msgs::srv::ControlModeCommand::Response::SharedPtr);
     void control_mode_command_callback_(
         const autoware_vehicle_msgs::srv::ControlModeCommand::Request::
             ConstSharedPtr,

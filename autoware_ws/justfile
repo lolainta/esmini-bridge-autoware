@@ -4,11 +4,19 @@ source_aw := 'source /autoware/install/setup.bash'
 autoware_launch_pkg := shell(source_aw + " && ros2 pkg prefix autoware_launch --share")
 
 default:
+  just config_params
   just launch e6mini_same
 
+config_params:
+  yq e '\
+    ( .[] | select(.module == "planning" and .args.topic == "/planning/scenario_planning/trajectory") ).args.warn_rate = 3.0 \
+  ' -i /autoware/src/launcher/autoware_launch/autoware_launch/config/system/component_state_monitor/topics.yaml
+  yq e '\
+    (.launch[] | select(.arg.name == "launch_speed_bump_module") | .arg.default) = "true"\
+  ' -i /autoware/src/launcher/autoware_launch/autoware_launch/config/planning/preset/default_preset.yaml
 build pkg:
-  rm -r /autoware/install/{{pkg}}
-  rm -r /autoware/build/{{pkg}}
+  rm -rf /autoware/install/{{pkg}}
+  rm -rf /autoware/build/{{pkg}}
   {{source_aw}} && \
     cd /autoware && \
     colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release --packages-select {{pkg}}
@@ -40,9 +48,7 @@ launch map:
 sample map:
   just build tier4_simulator_launch
   # just build autoware_launch
-  yq e '\
-    ( .[] | select(.module == "planning" and .args.topic == "/planning/scenario_planning/trajectory") ).args.warn_rate = 3.0 \
-  ' -i /autoware/src/launcher/autoware_launch/autoware_launch/config/system/component_state_monitor/topics.yaml
+  just config_params
   {{source_aw}} && ros2 launch autoware_launch \
     planning_simulator.launch.xml \
     map_path:=/resources/osm/ \

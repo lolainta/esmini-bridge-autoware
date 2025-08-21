@@ -43,7 +43,7 @@ AutowareHandler::AutowareHandler(float init_x, float init_y, float init_h,
 
     this->pub_detected_objects_ =
         this->create_publisher<autoware_perception_msgs::msg::DetectedObjects>(
-            "/perception/object_recognition/detection/objects", 10);
+            "/perception/object_recognition/detection/objects_debug", 10);
     this->pub_predicted_objects_ =
         this->create_publisher<autoware_perception_msgs::msg::PredictedObjects>(
             "/perception/object_recognition/objects", 10);
@@ -294,8 +294,16 @@ void AutowareHandler::set_object(int id, float x, float y, float h, float v) {
     autoware_perception_msgs::msg::PredictedObject predict_obj;
     autoware_perception_msgs::msg::ObjectClassification classification;
 
+    float diff_x = x - this->ego_state.x;
+    float diff_y = y - this->ego_state.y;
+    float rel_h = h - this->ego_state.h;
+    float rel_x =
+        cos(-this->ego_state.h) * diff_x - sin(-this->ego_state.h) * diff_y;
+    float rel_y =
+        sin(-this->ego_state.h) * diff_x + cos(-this->ego_state.h) * diff_y;
     classification.label =
         autoware_perception_msgs::msg::ObjectClassification::CAR;
+    classification.probability = 1.0;
 
     detect_obj.classification.push_back(classification);
     detect_obj.kinematics.pose_with_covariance.pose.position.x = x;
