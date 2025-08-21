@@ -41,7 +41,11 @@ jobs:
           cache-to: type=registry,ref=${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_IMAGE_NAME }}:buildcache,mode=max
 
   build-and-push-esmini-bridge-autoware-esmini:
+    runs-on: self-hosted
+    environment: Build
     needs: build-and-push-eba-autoware
+
+
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -74,7 +78,10 @@ jobs:
           cache-to: type=registry,ref=${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_IMAGE_NAME }}:buildcache,mode=max
 
   build-and-push-esmini-bridge-autoware-autoware:
+    runs-on: self-hosted
+    environment: Build
     needs: build-and-push-eba-autoware
+
     steps:
       - name: Checkout
         uses: actions/checkout@v3
