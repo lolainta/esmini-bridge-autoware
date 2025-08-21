@@ -5,7 +5,7 @@ name: Build containers
 on: [workflow_dispatch, push]
 
 jobs:
-  bulid-and-push-eba-autoware:
+  build-and-push-eba-autoware:
     runs-on: self-hosted
     environment: Build
 
@@ -44,7 +44,6 @@ jobs:
     runs-on: self-hosted
     environment: Build
     needs: build-and-push-eba-autoware
-
 
     steps:
       - name: Checkout
