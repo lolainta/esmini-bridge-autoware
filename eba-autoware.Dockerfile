@@ -28,7 +28,7 @@ rm -rf /var/lib/apt/lists/*
 EOF
 
 WORKDIR /autoware
-ADD https://github.com/autowarefoundation/autoware.git /autoware
+ADD https://github.com/autowarefoundation/autoware.git#7914486293cad67543f36a4edd59dbc6dee56156 /autoware
 
 
 RUN <<EOF
@@ -46,7 +46,7 @@ RUN <<EOF
 . /opt/ros/humble/setup.sh
 apt update
 rosdep update
-rosdep install -y --from-paths src --ignore-src --rosdistro "$ROS_DISTRO"
+rosdep install -yr --from-paths src --ignore-src --rosdistro "$ROS_DISTRO"
 rm -rf /var/lib/apt/lists/*
 EOF
 
