@@ -1,8 +1,6 @@
 services:
   esmini:
-    build:
-      context: .
-      dockerfile: esmini.Dockerfile
+    image: tonychi/esmini-bridge-autoware-esmini
     entrypoint: sleep infinity
     hostname: esmini
     container_name: eba-esmini
@@ -13,9 +11,7 @@ services:
       - ./resources:/resources
       - /tmp/.X11-unix:/tmp/.X11-unix
   autoware:
-    build:
-      context: .
-      dockerfile: autoware.Dockerfile
+    image: tonychi/esmini-bridge-autoware-autoware
     entrypoint: sleep infinity
     environment:
       - DISPLAY

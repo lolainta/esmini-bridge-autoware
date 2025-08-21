@@ -4,11 +4,52 @@ source_aw := 'source /autoware/install/setup.bash'
 autoware_launch_pkg := shell(source_aw + " && ros2 pkg prefix autoware_launch --share")
 
 default:
-  just launch crest-curve
+  just config_params
+  just launch e6mini_same
+
+config_params:
+  yq e '\
+    ( .[] | select(.module == "planning" and .args.topic == "/planning/scenario_planning/trajectory") ).args.warn_rate = 3.0 \
+  ' -i /autoware/src/launcher/autoware_launch/autoware_launch/config/system/component_state_monitor/topics.yaml
+  yq e '\
+    (.launch[] | select(.arg.name == "launch_speed_bump_module") | .arg.default) = "true"\
+  ' -i /autoware/src/launcher/autoware_launch/autoware_launch/config/planning/preset/default_preset.yaml
+build pkg:
+  rm -rf /autoware/install/{{pkg}}
+  rm -rf /autoware/build/{{pkg}}
+  {{source_aw}} && \
+    cd /autoware && \
+    colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release --packages-select {{pkg}}
+
+build_all:
+  {{source_aw}} && \
+    cd /autoware && \
+    colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release
+
 
 launch map:
-  {{source_aw}} && \
-    ros2 launch autoware_launch \
+  {{source_aw}} && ros2 launch autoware_launch \
+    autoware.launch.xml \
+    map_path:=/resources/osm/ \
+    lanelet2_map_file:={{map}}.osm \
+    vehicle_model:=sample_vehicle \
+    sensor_model:=sample_sensor_kit \
+    launch_sensing:=false \
+    launch_localization:=false \
+    launch_perception:=false \
+    launch_vehicle_interface:=false \
+    system_run_mode:=planning_simulation \
+    launch_system_monitor:=false \
+    launch_dummy_diag_publisher:=true \
+    diagnostic_graph_aggregator_graph_path:={{autoware_launch_pkg}}/config/system/diagnostics/autoware-main.yaml \
+    enable_all_modules_auto_mode:=true \
+    is_simulation:=true
+
+sample map:
+  just config_params
+  just build tier4_simulator_launch
+  just build autoware_launch
+  {{source_aw}} && ros2 launch autoware_launch \
     planning_simulator.launch.xml \
     map_path:=/resources/osm/ \
     lanelet2_map_file:={{map}}.osm \
@@ -23,6 +64,3 @@ launch map:
     launch_dummy_diag_publisher:=true \
     diagnostic_graph_aggregator_graph_path:={{autoware_launch_pkg}}/config/system/diagnostics/autoware-main.yaml \
     is_simulation:=true
-
-sample:
-  {{source_aw}} && ros2 launch autoware_launch planning_simulator.launch.xml map_path:=$HOME/autoware_map/sample-map-planning vehicle_model:=sample_vehicle sensor_model:=sample_sensor_kit

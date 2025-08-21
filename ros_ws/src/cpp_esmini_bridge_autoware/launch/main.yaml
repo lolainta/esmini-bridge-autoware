@@ -1,0 +1,68 @@
+launch:
+  - arg:
+      name: "launch_simulator_perception_modules"
+      default: "true"
+  - arg:
+      name: "launch_dummy_perception"
+      default: "true"
+  - node:
+      pkg: cpp_esmini_bridge_autoware
+      exec: esmini-bridge-autoware
+  - group:
+      if: $(var launch_simulator_perception_modules)
+      children:
+        - group:
+            if: $(var launch_dummy_perception)
+            children:
+              - include:
+                  # file: "$(find-pkg-share dummy_perception_publisher)/launch/dummy_perception_publisher.launch.xml"
+                  file: "$(find-pkg-share cpp_esmini_bridge_autoware)/launch/dummy_perception.xml"
+                  arg:
+                    - name: "real"
+                      value: "false"
+                    - name: "use_object_recognition"
+                      value: "false"
+                    - name: "use_base_link_z"
+                      value: "false"
+                    - name: "visible_range"
+                      value: "300.0"
+  - group:
+      - include:
+          file: "$(find-pkg-share autoware_pose_initializer)/launch/pose_initializer.launch.xml"
+          arg:
+            - name: "user_defined_initial_pose/enable"
+              value: "false"
+            - name: "user_defined_initial_pose/pose"
+              value: "[0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0]"
+            - name: "ndt_enabled"
+              value: "false"
+            - name: "gnss_enabled"
+              value: "false"
+            - name: "ekf_enabled"
+              value: "false"
+            - name: "yabloc_enabled"
+              value: "false"
+            - name: "stop_check_enabled"
+              value: "false"
+            - name: "config_file"
+              value: "$(find-pkg-share autoware_launch)/config/localization/pose_initializer.param.yaml"
+  - group:
+      - include:
+          file: "$(find-pkg-share tier4_perception_launch)/launch/occupancy_grid_map/probabilistic_occupancy_grid_map.launch.xml"
+          arg:
+            - name: "input_obstacle_pointcloud"
+              value: "true"
+            - name: "input_obstacle_and_raw_pointcloud"
+              value: "false"
+            - name: "input/obstacle_pointcloud"
+              value: "/perception/obstacle_segmentation/pointcloud"
+            - name: "output"
+              value: "/perception/occupancy_grid_map/map"
+            - name: "occupancy_grid_map_method"
+              value: "laserscan_based_occupancy_grid_map"
+            - name: "occupancy_grid_map_param_path"
+              value: "$(find-pkg-share autoware_launch)/config/perception/occupancy_grid_map/laserscan_based_occupancy_grid_map.param.yaml"
+            - name: "occupancy_grid_map_updater"
+              value: "binary_bayes_filter"
+            - name: "occupancy_grid_map_updater_param_path"
+              value: "$(find-pkg-share autoware_launch)/config/perception/occupancy_grid_map/$(var occupancy_grid_map_updater)_updater.param.yaml"
