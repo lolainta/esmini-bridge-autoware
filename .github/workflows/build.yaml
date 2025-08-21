@@ -1,6 +1,5 @@
 env:
   DOCKER_REGISTRY: docker.io
-  DOCKER_IMAGE_NAME: tonychi/eba-autoware
 
 name: Build containers
 on: [workflow_dispatch, push]
@@ -9,7 +8,6 @@ jobs:
   bulid-and-push-eba-autoware:
     runs-on: self-hosted
     environment: Build
-
 
     steps:
       - name: Checkout
@@ -37,7 +35,75 @@ jobs:
           file: ./eba-autoware.Dockerfile
           push: true
           tags: |
-            ${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_IMAGE_NAME }}:${{ steps.image_tag.outputs.TAG }}
-            ${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_IMAGE_NAME }}:latest
+            ${{ env.DOCKER_REGISTRY }}/tonychi/eba-autoware:${{ steps.image_tag.outputs.TAG }}
+            ${{ env.DOCKER_REGISTRY }}/tonychi/eba-autoware:latest
           cache-from: type=registry,ref=${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_IMAGE_NAME }}:buildcache
           cache-to: type=registry,ref=${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_IMAGE_NAME }}:buildcache,mode=max
+
+  build-and-push-esmini-bridge-autoware-esmini:
+    needs: build-and-push-eba-autoware
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Registry
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Use commit hash as image tag
+        id: image_tag
+        run: echo "TAG=${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
+
+      - name: Build and Push the Docker Image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./esmini-ws.Dockerfile
+          push: true
+          tags: |
+            ${{ env.DOCKER_REGISTRY }}/tonychi/esmini-bridge-autoware-esmini:${{ steps.image_tag.outputs.TAG }}
+            ${{ env.DOCKER_REGISTRY }}/tonychi/esmini-bridge-autoware-esmini:latest
+          cache-from: type=registry,ref=${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_IMAGE_NAME }}:buildcache
+          cache-to: type=registry,ref=${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_IMAGE_NAME }}:buildcache,mode=max
+
+  build-and-push-esmini-bridge-autoware-autoware:
+    needs: build-and-push-eba-autoware
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Registry
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Use commit hash as image tag
+        id: image_tag
+        run: echo "TAG=${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
+
+      - name: Build and Push the Docker Image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./autoware-ws.Dockerfile
+          push: true
+          tags: |
+            ${{ env.DOCKER_REGISTRY }}/tonychi/esmini-bridge-autoware-autoware:${{ steps.image_tag.outputs.TAG }}
+            ${{ env.DOCKER_REGISTRY }}/tonychi/esmini-bridge-autoware-autoware:latest
+          cache-from: type=registry,ref=${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_IMAGE_NAME }}:buildcache
+          cache-to: type=registry,ref=${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_IMAGE_NAME }}:buildcache,mode=max
+
+
