@@ -384,7 +384,7 @@ void AutowareHandler::timer_callback() {
                          "Velocity: %f, Rotation: %f", this->velocity,
                          this->rotation);
     RCLCPP_INFO_THROTTLE(this->get_logger(), *this->get_clock(), 5000,
-                         "Ego State: %f, %f, %f", this->ego_pose.x,
+                         "Ego Pose: %f, %f, %f", this->ego_pose.x,
                          this->ego_pose.y, this->ego_pose.h);
     this->publish_control_mode_();
     this->publish_gear_report_();
