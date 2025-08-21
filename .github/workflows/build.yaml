@@ -8,6 +8,8 @@ on: [workflow_dispatch, push]
 jobs:
   bulid-and-push-eba-autoware:
     runs-on: self-hosted
+    environment: Build
+
 
     steps:
       - name: Checkout
