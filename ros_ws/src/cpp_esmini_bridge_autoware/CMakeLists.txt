@@ -15,6 +15,7 @@ find_package(rclcpp REQUIRED)
 find_package(autoware_adapi_v1_msgs REQUIRED)
 find_package(autoware_control_msgs REQUIRED)
 find_package(autoware_perception_msgs REQUIRED)
+find_package(autoware_system_msgs REQUIRED)
 find_package(autoware_vehicle_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(std_srvs REQUIRED)
@@ -36,6 +37,7 @@ ament_target_dependencies(esmini-bridge-autoware
   autoware_adapi_v1_msgs
   autoware_control_msgs
   autoware_perception_msgs
+  autoware_system_msgs
   autoware_vehicle_msgs
   sensor_msgs
   std_srvs

@@ -6,6 +6,7 @@
 #include "autoware_perception_msgs/msg/detected_objects.hpp"
 #include "autoware_perception_msgs/msg/object_classification.hpp"
 #include "autoware_perception_msgs/msg/predicted_objects.hpp"
+#include "autoware_system_msgs/msg/autoware_state.hpp"
 #include "autoware_vehicle_msgs/msg/control_mode_report.hpp"
 #include "autoware_vehicle_msgs/msg/gear_report.hpp"
 #include "autoware_vehicle_msgs/msg/steering_report.hpp"
@@ -22,12 +23,12 @@
 #include "std_srvs/srv/trigger.hpp"
 #include "tf2_msgs/msg/tf_message.hpp"
 
-typedef struct EgoState {
+typedef struct EgoPose {
     float x = 0;
     float y = 0;
     float h = 0;
     float time = 0;
-} EgoState;
+} EgoPose;
 
 class AutowareHandler : public rclcpp::Node {
   public:
@@ -35,7 +36,7 @@ class AutowareHandler : public rclcpp::Node {
 
     float get_velocity() const { return velocity; }
     float get_rotation() const { return rotation; }
-    void set_ego_state(float, float, float);
+    void set_ego_pose(float, float, float);
     void set_object(int, float, float, float, float);
     bool is_engaged() const { return engaged; }
 
@@ -43,13 +44,12 @@ class AutowareHandler : public rclcpp::Node {
     float init_x, init_y, init_h;
     float goal_x, goal_y, goal_h;
 
-    EgoState ego_state;
-    EgoState prev_ego_state;
-    EgoState prev_ego_state2;
+    EgoPose ego_pose;
+    EgoPose prev_ego_pose;
+    EgoPose prev_ego_pose2;
     sensor_msgs::msg::Imu imu_state;
+    autoware_system_msgs::msg::AutowareState autoware_state;
 
-    std::unordered_map<int, autoware_perception_msgs::msg::DetectedObject>
-        detected_objects_map;
     std::unordered_map<int, autoware_perception_msgs::msg::PredictedObject>
         predicted_objects_map;
 
@@ -82,8 +82,6 @@ class AutowareHandler : public rclcpp::Node {
     rclcpp::Publisher<sensor_msgs::msg::Imu>::SharedPtr pub_imu_state_;
     rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr pub_kinematic_state_;
 
-    rclcpp::Publisher<autoware_perception_msgs::msg::DetectedObjects>::SharedPtr
-        pub_detected_objects_;
     rclcpp::Publisher<autoware_perception_msgs::msg::PredictedObjects>::
         SharedPtr pub_predicted_objects_;
 

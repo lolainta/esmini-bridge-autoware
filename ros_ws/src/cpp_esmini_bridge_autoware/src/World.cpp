@@ -19,9 +19,10 @@ World::World() : Node("World") {
 }
 
 void World::esmini_init() {
+    SE_AddPath("/esmini/resources/xosc/");
+
     // SE_Init("/esmini/resources/xosc/cut-in.xosc", 0, 1, 0, 0);
     // SE_Init("/resources/xosc/chengyu/SinD_test1.xosc", 1, 1, 0, 0);
-    SE_AddPath("/esmini/resources/xosc/");
     SE_Init("/resources/xosc/yusheng/148.xosc", 1, 1, 0, 1);
     // SE_Init("/resources/xosc/chengyu/1.xosc", 1, 1, 0, 1);
     SE_CollisionDetection(true);
@@ -63,5 +64,5 @@ void World::timer_callback() {
     RCLCPP_INFO_THROTTLE(this->get_logger(), *this->get_clock(), 5000,
                          "Vehicle State: %f, %f, %f", vehicleState.x,
                          vehicleState.y, vehicleState.h);
-    this->ego->set_ego_state(vehicleState.x, vehicleState.y, vehicleState.h);
+    this->ego->set_ego_pose(vehicleState.x, vehicleState.y, vehicleState.h);
 }

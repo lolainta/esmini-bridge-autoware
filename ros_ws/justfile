@@ -8,7 +8,8 @@ default:
   just run
 
 deps:
-  rosdep install --from-path src --ignore-src -y
+  apt update
+  {{source_ros}} && rosdep install --from-path src --ignore-src -y
 
 build: deps
   {{source_ros}} && colcon build

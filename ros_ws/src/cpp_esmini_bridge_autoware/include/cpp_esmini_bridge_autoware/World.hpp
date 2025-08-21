@@ -4,6 +4,13 @@
 #include "esminiLib.hpp"
 #include "rclcpp/rclcpp.hpp"
 
+typedef enum EgoState {
+    INITIALIZING,
+    PLANNING,
+    WAITING_FOR_ENGAGE,
+    DRIVING,
+} EgoState;
+
 class World : public rclcpp::Node {
   public:
     World();
@@ -12,6 +19,7 @@ class World : public rclcpp::Node {
 
   private:
     std::shared_ptr<AutowareHandler> ego;
+    EgoState ego_state;
 
     rclcpp::TimerBase::SharedPtr timer_;
 

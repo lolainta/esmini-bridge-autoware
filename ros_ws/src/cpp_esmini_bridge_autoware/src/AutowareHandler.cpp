@@ -41,9 +41,6 @@ AutowareHandler::AutowareHandler(float init_x, float init_y, float init_h,
         this->create_publisher<nav_msgs::msg::Odometry>(
             "/localization/kinematic_state", 10);
 
-    this->pub_detected_objects_ =
-        this->create_publisher<autoware_perception_msgs::msg::DetectedObjects>(
-            "/perception/object_recognition/detection/objects_debug", 10);
     this->pub_predicted_objects_ =
         this->create_publisher<autoware_perception_msgs::msg::PredictedObjects>(
             "/perception/object_recognition/objects", 10);
@@ -78,27 +75,27 @@ AutowareHandler::AutowareHandler(float init_x, float init_y, float init_h,
         10s, std::bind(&AutowareHandler::engage_autoware_, this));
 }
 
-void AutowareHandler::set_ego_state(float x, float y, float h) {
-    this->prev_ego_state2 = this->prev_ego_state;
-    this->prev_ego_state = this->ego_state;
-    this->ego_state.x = x;
-    this->ego_state.y = y;
-    this->ego_state.h = h;
-    this->ego_state.time = this->now().seconds();
+void AutowareHandler::set_ego_pose(float x, float y, float h) {
+    this->prev_ego_pose2 = this->prev_ego_pose;
+    this->prev_ego_pose = this->ego_pose;
+    this->ego_pose.x = x;
+    this->ego_pose.y = y;
+    this->ego_pose.h = h;
+    this->ego_pose.time = this->now().seconds();
 }
 
 void AutowareHandler::calc_imu_state_() {
-    float dt1 = this->now().seconds() - this->prev_ego_state.time;
-    float dt2 = this->prev_ego_state.time - this->prev_ego_state2.time;
+    float dt1 = this->now().seconds() - this->prev_ego_pose.time;
+    float dt2 = this->prev_ego_pose.time - this->prev_ego_pose2.time;
     float dt = (dt1 + dt2) / 2.0;
 
     geometry_msgs::msg::Vector3 cur_v;
-    cur_v.x = (this->ego_state.x - this->prev_ego_state.x) / dt1;
-    cur_v.y = (this->ego_state.y - this->prev_ego_state.y) / dt1;
+    cur_v.x = (this->ego_pose.x - this->prev_ego_pose.x) / dt1;
+    cur_v.y = (this->ego_pose.y - this->prev_ego_pose.y) / dt1;
     cur_v.z = 0.0;
     geometry_msgs::msg::Vector3 prev_v;
-    prev_v.x = (this->prev_ego_state.x - this->prev_ego_state2.x) / dt2;
-    prev_v.y = (this->prev_ego_state.y - this->prev_ego_state2.y) / dt2;
+    prev_v.x = (this->prev_ego_pose.x - this->prev_ego_pose2.x) / dt2;
+    prev_v.y = (this->prev_ego_pose.y - this->prev_ego_pose2.y) / dt2;
     prev_v.z = 0.0;
     geometry_msgs::msg::Vector3 linear_acceleration;
     linear_acceleration.x = (cur_v.x - prev_v.x) / dt;
@@ -108,7 +105,7 @@ void AutowareHandler::calc_imu_state_() {
     geometry_msgs::msg::Vector3 angular_velocity;
     angular_velocity.x = 0.0;
     angular_velocity.y = 0.0;
-    angular_velocity.z = (this->ego_state.h - this->prev_ego_state.h) / dt;
+    angular_velocity.z = (this->ego_pose.h - this->prev_ego_pose.h) / dt;
     this->imu_state.linear_acceleration = linear_acceleration;
     this->imu_state.angular_velocity = angular_velocity;
     this->imu_state.header.stamp = this->now();
@@ -244,12 +241,12 @@ void AutowareHandler::publish_tf_() {
     transform.header.stamp = this->now();
     transform.header.frame_id = "map";
     transform.child_frame_id = "base_link";
-    transform.transform.translation.x = this->ego_state.x;
-    transform.transform.translation.y = this->ego_state.y;
+    transform.transform.translation.x = this->ego_pose.x;
+    transform.transform.translation.y = this->ego_pose.y;
     transform.transform.rotation.x = 0.0;
     transform.transform.rotation.y = 0.0;
-    transform.transform.rotation.z = sin(this->ego_state.h / 2);
-    transform.transform.rotation.w = cos(this->ego_state.h / 2);
+    transform.transform.rotation.z = sin(this->ego_pose.h / 2);
+    transform.transform.rotation.w = cos(this->ego_pose.h / 2);
     tf.transforms.push_back(transform);
     this->pub_tf_->publish(tf);
 }
@@ -258,13 +255,13 @@ void AutowareHandler::publish_pose_() {
     geometry_msgs::msg::PoseStamped pose;
     pose.header.stamp = this->now();
     pose.header.frame_id = "map";
-    pose.pose.position.x = this->ego_state.x;
-    pose.pose.position.y = this->ego_state.y;
+    pose.pose.position.x = this->ego_pose.x;
+    pose.pose.position.y = this->ego_pose.y;
     pose.pose.position.z = 0.0;
     pose.pose.orientation.x = 0.0;
     pose.pose.orientation.y = 0.0;
-    pose.pose.orientation.z = sin(this->ego_state.h / 2);
-    pose.pose.orientation.w = cos(this->ego_state.h / 2);
+    pose.pose.orientation.z = sin(this->ego_pose.h / 2);
+    pose.pose.orientation.w = cos(this->ego_pose.h / 2);
     this->pub_pose_->publish(pose);
 }
 
@@ -277,48 +274,32 @@ void AutowareHandler::publish_kinematic_state_() {
     kinematic_state.header.stamp = this->now();
     kinematic_state.header.frame_id = "map";
     kinematic_state.child_frame_id = "base_link";
-    kinematic_state.pose.pose.position.x = this->ego_state.x;
-    kinematic_state.pose.pose.position.y = this->ego_state.y;
+    kinematic_state.pose.pose.position.x = this->ego_pose.x;
+    kinematic_state.pose.pose.position.y = this->ego_pose.y;
     kinematic_state.pose.pose.position.z = 0.0;
     kinematic_state.pose.pose.orientation.x = 0.0;
     kinematic_state.pose.pose.orientation.y = 0.0;
-    kinematic_state.pose.pose.orientation.z = sin(this->ego_state.h / 2);
-    kinematic_state.pose.pose.orientation.w = cos(this->ego_state.h / 2);
+    kinematic_state.pose.pose.orientation.z = sin(this->ego_pose.h / 2);
+    kinematic_state.pose.pose.orientation.w = cos(this->ego_pose.h / 2);
     kinematic_state.twist.twist.linear.x = this->velocity;
     kinematic_state.twist.twist.angular.z = this->rotation;
     this->pub_kinematic_state_->publish(kinematic_state);
 }
 
 void AutowareHandler::set_object(int id, float x, float y, float h, float v) {
-    autoware_perception_msgs::msg::DetectedObject detect_obj;
     autoware_perception_msgs::msg::PredictedObject predict_obj;
     autoware_perception_msgs::msg::ObjectClassification classification;
 
-    float diff_x = x - this->ego_state.x;
-    float diff_y = y - this->ego_state.y;
-    float rel_h = h - this->ego_state.h;
+    float diff_x = x - this->ego_pose.x;
+    float diff_y = y - this->ego_pose.y;
+    float rel_h = h - this->ego_pose.h;
     float rel_x =
-        cos(-this->ego_state.h) * diff_x - sin(-this->ego_state.h) * diff_y;
+        cos(-this->ego_pose.h) * diff_x - sin(-this->ego_pose.h) * diff_y;
     float rel_y =
-        sin(-this->ego_state.h) * diff_x + cos(-this->ego_state.h) * diff_y;
+        sin(-this->ego_pose.h) * diff_x + cos(-this->ego_pose.h) * diff_y;
     classification.label =
         autoware_perception_msgs::msg::ObjectClassification::CAR;
     classification.probability = 1.0;
-
-    detect_obj.classification.push_back(classification);
-    detect_obj.kinematics.pose_with_covariance.pose.position.x = x;
-    detect_obj.kinematics.pose_with_covariance.pose.position.y = y;
-    detect_obj.kinematics.pose_with_covariance.pose.position.z = 0.0;
-    detect_obj.kinematics.pose_with_covariance.pose.orientation.x = 0.0;
-    detect_obj.kinematics.pose_with_covariance.pose.orientation.y = 0.0;
-    detect_obj.kinematics.pose_with_covariance.pose.orientation.z = sin(h / 2);
-    detect_obj.kinematics.pose_with_covariance.pose.orientation.w = cos(h / 2);
-    detect_obj.kinematics.twist_with_covariance.twist.linear.x = v;
-    detect_obj.shape.type = autoware_perception_msgs::msg::Shape::BOUNDING_BOX;
-    detect_obj.shape.dimensions.x = 4.5;
-    detect_obj.shape.dimensions.y = 2.0;
-    detect_obj.shape.dimensions.z = 1.5;
-    this->detected_objects_map[id] = detect_obj;
 
     predict_obj.classification.push_back(classification);
     predict_obj.kinematics.initial_pose_with_covariance.pose.position.x = x;
@@ -350,14 +331,6 @@ void AutowareHandler::publish_objects_() {
         predicted_objects.objects.push_back(obj);
     }
     this->pub_predicted_objects_->publish(predicted_objects);
-
-    autoware_perception_msgs::msg::DetectedObjects detected_objects;
-    detected_objects.header.stamp = this->now();
-    detected_objects.header.frame_id = "base_link";
-    for (auto &[i, obj] : this->detected_objects_map) {
-        detected_objects.objects.push_back(obj);
-    }
-    this->pub_detected_objects_->publish(detected_objects);
 }
 
 void AutowareHandler::control_command_callback_(
@@ -381,8 +354,8 @@ void AutowareHandler::timer_callback() {
                          "Velocity: %f, Rotation: %f", this->velocity,
                          this->rotation);
     RCLCPP_INFO_THROTTLE(this->get_logger(), *this->get_clock(), 5000,
-                         "Ego State: %f, %f, %f", this->ego_state.x,
-                         this->ego_state.y, this->ego_state.h);
+                         "Ego State: %f, %f, %f", this->ego_pose.x,
+                         this->ego_pose.y, this->ego_pose.h);
     this->publish_control_mode_();
     this->publish_gear_report_();
     this->publish_steering_();
