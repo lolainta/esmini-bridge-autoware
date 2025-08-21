@@ -46,9 +46,9 @@ launch map:
     is_simulation:=true
 
 sample map:
-  just build tier4_simulator_launch
-  # just build autoware_launch
   just config_params
+  just build tier4_simulator_launch
+  just build autoware_launch
   {{source_aw}} && ros2 launch autoware_launch \
     planning_simulator.launch.xml \
     map_path:=/resources/osm/ \

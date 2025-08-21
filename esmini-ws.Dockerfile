@@ -5,7 +5,9 @@ RUN curl --proto '=https' --tlsv1.2 -sSf https://just.systems/install.sh | bash 
 ENV RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
 
 WORKDIR /esmini
+
 ADD https://github.com/esmini/esmini.git .
+
 RUN <<EOF
 apt-get update
 apt-get full-upgrade
@@ -15,5 +17,14 @@ rm -rf /var/lib/apt/lists/*
 EOF
 
 RUN cmake -B build/ -S . && cmake --build build/ --config Release --target install -j
+
+RUN <<EOF
+apt-get update
+apt-get full-upgrade
+apt-get install -y --no-install-recommends \
+  ros-humble-rmw-cyclonedds-cpp
+rm -rf /var/lib/apt/lists/*
+EOF
+
 
 WORKDIR /ros_ws
