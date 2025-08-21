@@ -12,6 +12,7 @@
 #include "autoware_vehicle_msgs/msg/steering_report.hpp"
 #include "autoware_vehicle_msgs/msg/velocity_report.hpp"
 #include "autoware_vehicle_msgs/srv/control_mode_command.hpp"
+#include "cpp_esmini_bridge_autoware/EgoState.hpp"
 #include "esminiLib.hpp"
 #include "geometry_msgs/msg/accel_with_covariance_stamped.hpp"
 #include "geometry_msgs/msg/pose_stamped.hpp"
@@ -38,7 +39,6 @@ class AutowareHandler : public rclcpp::Node {
     float get_rotation() const { return rotation; }
     void set_ego_pose(float, float, float);
     void set_object(int, float, float, float, float);
-    bool is_engaged() const { return engaged; }
 
   private:
     float init_x, init_y, init_h;

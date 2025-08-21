@@ -1,15 +1,9 @@
 #pragma once
 
 #include "cpp_esmini_bridge_autoware/AutowareHandler.hpp"
+#include "cpp_esmini_bridge_autoware/EgoState.hpp"
 #include "esminiLib.hpp"
 #include "rclcpp/rclcpp.hpp"
-
-typedef enum EgoState {
-    INITIALIZING,
-    PLANNING,
-    WAITING_FOR_ENGAGE,
-    DRIVING,
-} EgoState;
 
 class World : public rclcpp::Node {
   public:
