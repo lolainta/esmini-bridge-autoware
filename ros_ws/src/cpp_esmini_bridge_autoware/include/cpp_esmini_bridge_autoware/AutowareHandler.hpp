@@ -39,6 +39,7 @@ class AutowareHandler : public rclcpp::Node {
     float get_rotation() const { return rotation; }
     void set_ego_pose(float, float, float);
     void set_object(int, float, float, float, float);
+    EgoState get_ego_state() const { return ego_state; }
 
   private:
     float init_x, init_y, init_h;
@@ -47,6 +48,7 @@ class AutowareHandler : public rclcpp::Node {
     EgoPose ego_pose;
     EgoPose prev_ego_pose;
     EgoPose prev_ego_pose2;
+    EgoState ego_state;
     sensor_msgs::msg::Imu imu_state;
     autoware_system_msgs::msg::AutowareState autoware_state;
 
@@ -87,6 +89,8 @@ class AutowareHandler : public rclcpp::Node {
 
     rclcpp::Subscription<autoware_control_msgs::msg::Control>::SharedPtr
         sub_control_command_;
+    rclcpp::Subscription<autoware_system_msgs::msg::AutowareState>::SharedPtr
+        sub_autoware_state_;
 
     rclcpp::Service<autoware_vehicle_msgs::srv::ControlModeCommand>::SharedPtr
         srv_control_mode_command_;
@@ -124,6 +128,8 @@ class AutowareHandler : public rclcpp::Node {
 
     void control_command_callback_(
         const autoware_control_msgs::msg::Control::SharedPtr msg);
+    void autoware_state_callback_(
+        const autoware_system_msgs::msg::AutowareState::SharedPtr msg);
 
     void control_mode_command_callback_(
         const autoware_vehicle_msgs::srv::ControlModeCommand::Request::

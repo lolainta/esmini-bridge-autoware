@@ -50,6 +50,11 @@ AutowareHandler::AutowareHandler(float init_x, float init_y, float init_h,
             "/control/command/control_cmd", 10,
             std::bind(&AutowareHandler::control_command_callback_, this,
                       std::placeholders::_1));
+    this->sub_autoware_state_ =
+        this->create_subscription<autoware_system_msgs::msg::AutowareState>(
+            "/autoware/state", 10,
+            std::bind(&AutowareHandler::autoware_state_callback_, this,
+                      std::placeholders::_1));
 
     this->srv_control_mode_command_ =
         this->create_service<autoware_vehicle_msgs::srv::ControlModeCommand>(
@@ -337,6 +342,31 @@ void AutowareHandler::control_command_callback_(
     const autoware_control_msgs::msg::Control::SharedPtr msg) {
     this->rotation = msg->lateral.steering_tire_angle;
     this->velocity = msg->longitudinal.velocity;
+}
+
+void AutowareHandler::autoware_state_callback_(
+    const autoware_system_msgs::msg::AutowareState::SharedPtr msg) {
+    if (msg->state == autoware_system_msgs::msg::AutowareState::INITIALIZING) {
+        this->ego_state = EgoState::INITIALIZING;
+    } else if (msg->state == autoware_system_msgs::msg::AutowareState::
+                                 WAITING_FOR_ROUTE ||
+               msg->state ==
+                   autoware_system_msgs::msg::AutowareState::PLANNING) {
+        this->ego_state = EgoState::PLANNING;
+    } else if (msg->state ==
+               autoware_system_msgs::msg::AutowareState::WAITING_FOR_ENGAGE) {
+        this->ego_state = EgoState::WAITING_FOR_ENGAGE;
+    } else if (msg->state ==
+               autoware_system_msgs::msg::AutowareState::DRIVING) {
+        this->ego_state = EgoState::DRIVING;
+    } else if (msg->state ==
+                   autoware_system_msgs::msg::AutowareState::ARRIVED_GOAL ||
+               msg->state ==
+                   autoware_system_msgs::msg::AutowareState::FINALIZING) {
+        this->ego_state = EgoState::FINALIZED;
+    } else {
+        this->ego_state = EgoState::UNKNOWN;
+    }
 }
 
 void AutowareHandler::control_mode_command_callback_(
