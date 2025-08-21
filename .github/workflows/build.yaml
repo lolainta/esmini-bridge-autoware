@@ -8,6 +8,8 @@ jobs:
   build-and-push-eba-autoware:
     runs-on: self-hosted
     environment: Build
+    env:
+      DOCKER_IMAGE_NAME: tonychi/eba-autoware
 
     steps:
       - name: Checkout
@@ -35,15 +37,17 @@ jobs:
           file: ./eba-autoware.Dockerfile
           push: true
           tags: |
-            ${{ env.DOCKER_REGISTRY }}/tonychi/eba-autoware:${{ steps.image_tag.outputs.TAG }}
-            ${{ env.DOCKER_REGISTRY }}/tonychi/eba-autoware:latest
+            ${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_IMAGE_NAME }}:${{ steps.image_tag.outputs.TAG }}
+            ${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_IMAGE_NAME }} :latest
           cache-from: type=registry,ref=${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_IMAGE_NAME }}:buildcache
           cache-to: type=registry,ref=${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_IMAGE_NAME }}:buildcache,mode=max
 
-  build-and-push-esmini-bridge-autoware-esmini:
+  build-and-push-esmini-ws:
     runs-on: self-hosted
     environment: Build
     needs: build-and-push-eba-autoware
+    env:
+      DOCKER_IMAGE_NAME: tonychi/esmini-bridge-autoware-esmini
 
     steps:
       - name: Checkout
@@ -71,15 +75,17 @@ jobs:
           file: ./esmini-ws.Dockerfile
           push: true
           tags: |
-            ${{ env.DOCKER_REGISTRY }}/tonychi/esmini-bridge-autoware-esmini:${{ steps.image_tag.outputs.TAG }}
-            ${{ env.DOCKER_REGISTRY }}/tonychi/esmini-bridge-autoware-esmini:latest
+            ${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_IMAGE_NAME }}:${{ steps.image_tag.outputs.TAG }}
+            ${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_IMAGE_NAME }}:latest
           cache-from: type=registry,ref=${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_IMAGE_NAME }}:buildcache
           cache-to: type=registry,ref=${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_IMAGE_NAME }}:buildcache,mode=max
 
-  build-and-push-esmini-bridge-autoware-autoware:
+  build-and-push-autoware-ws:
     runs-on: self-hosted
     environment: Build
     needs: build-and-push-eba-autoware
+    env:
+      DOCKER_IMAGE_NAME: tonychi/esmini-bridge-autoware-autoware
 
     steps:
       - name: Checkout
@@ -107,9 +113,8 @@ jobs:
           file: ./autoware-ws.Dockerfile
           push: true
           tags: |
-            ${{ env.DOCKER_REGISTRY }}/tonychi/esmini-bridge-autoware-autoware:${{ steps.image_tag.outputs.TAG }}
-            ${{ env.DOCKER_REGISTRY }}/tonychi/esmini-bridge-autoware-autoware:latest
+            ${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_IMAGE_NAME }}:${{ steps.image_tag.outputs.TAG }}
+            ${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_IMAGE_NAME }}:latest
           cache-from: type=registry,ref=${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_IMAGE_NAME }}:buildcache
           cache-to: type=registry,ref=${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_IMAGE_NAME }}:buildcache,mode=max
-
 
