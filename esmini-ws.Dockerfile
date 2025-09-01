@@ -2,8 +2,6 @@ FROM tonychi/eba-autoware:latest
 
 RUN curl --proto '=https' --tlsv1.2 -sSf https://just.systems/install.sh | bash -s -- --to /usr/local/bin/
 
-ENV RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
-
 WORKDIR /esmini
 
 ADD https://github.com/esmini/esmini.git .
@@ -17,13 +15,5 @@ rm -rf /var/lib/apt/lists/*
 EOF
 
 RUN cmake -B build/ -S . && cmake --build build/ --config Release --target install -j
-
-RUN <<EOF
-apt-get update
-apt-get -y full-upgrade
-apt-get install -y --no-install-recommends \
-  ros-humble-rmw-cyclonedds-cpp
-rm -rf /var/lib/apt/lists/*
-EOF
 
 WORKDIR /ros_ws

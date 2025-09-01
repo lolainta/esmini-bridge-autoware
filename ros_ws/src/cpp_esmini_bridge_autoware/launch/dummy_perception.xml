@@ -9,10 +9,13 @@
     <group>
         <push-ros-namespace namespace="simulation" />
         <group if="$(var real)">
-            <node pkg="autoware_dummy_perception_publisher"
+            <node
+                pkg="autoware_dummy_perception_publisher"
                 exec="autoware_dummy_perception_publisher_node"
-                name="dummy_perception_publisher" output="screen">
-                <remap from="output/dynamic_object"
+                name="dummy_perception_publisher"
+                output="screen">
+                <remap
+                    from="output/dynamic_object"
                     to="/perception/object_recognition/detection/labeled_clusters" />
                 <remap from="output/objects_pose" to="debug/object_pose" />
                 <remap from="output/points_raw" to="/perception/obstacle_segmentation/pointcloud" />
@@ -36,10 +39,12 @@
             </include>
         </group>
         <group unless="$(var real)">
-            <node pkg="autoware_dummy_perception_publisher"
-                exec="autoware_dummy_perception_publisher_node"
-                name="dummy_perception_publisher" output="screen">
-                <remap from="output/dynamic_object"
+            <node
+                pkg="autoware_dummy_perception_publisher"
+                exec="autoware_dummy_perception_publisher_node" name="dummy_perception_publisher"
+                output="screen">
+                <remap
+                    from="output/dynamic_object"
                     to="/perception/object_recognition/detection/objects_with_feature" />
                 <remap from="output/objects_pose" to="debug/object_pose" />
                 <remap from="output/points_raw" to="/perception/obstacle_segmentation/pointcloud" />
@@ -54,11 +59,10 @@
         </group>
 
         <!-- convert DynamicObjectsWithFeatureArray to DynamicObjects -->
-        <!-- <include
-            file="$(find-pkg-share
-        autoware_detected_object_feature_remover)/launch/detected_object_feature_remover.launch.xml">
+        <include
+            file="$(find-pkg-share autoware_detected_object_feature_remover)/launch/detected_object_feature_remover.launch.xml">
             <arg name="input" value="/perception/object_recognition/detection/objects_with_feature" />
             <arg name="output" value="/perception/object_recognition/detection/objects" />
-        </include> -->
+        </include>
     </group>
 </launch>

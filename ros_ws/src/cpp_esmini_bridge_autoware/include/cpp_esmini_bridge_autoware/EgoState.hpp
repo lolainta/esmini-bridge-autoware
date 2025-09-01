@@ -5,4 +5,6 @@ typedef enum EgoState {
     PLANNING,
     WAITING_FOR_ENGAGE,
     DRIVING,
+    FINALIZED,
+    UNKNOWN,
 } EgoState;

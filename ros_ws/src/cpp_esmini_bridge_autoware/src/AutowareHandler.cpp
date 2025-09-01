@@ -1,18 +1,19 @@
 #include "cpp_esmini_bridge_autoware/AutowareHandler.hpp"
 #include <chrono>
+#include <thread>
 
 using namespace std::chrono_literals;
 
-AutowareHandler::AutowareHandler(float init_x, float init_y, float init_h,
-                                 float goal_x, float goal_y, float goal_h)
-    : Node("AutowareHandler"), init_x(init_x), init_y(init_y), init_h(init_h),
-      goal_x(goal_x), goal_y(goal_y), goal_h(goal_h) {
+AutowareHandler::AutowareHandler()
+    : Node("AutowareHandler"), ego_state(EgoState::UNKNOWN) {
+
     this->initialpose_publisher_ =
         this->create_publisher<geometry_msgs::msg::PoseWithCovarianceStamped>(
             "/initialpose", 10);
     this->goalpose_publisher_ =
         this->create_publisher<geometry_msgs::msg::PoseStamped>(
             "/planning/mission_planning/goal", 10);
+
     this->engage_autoware_client_ =
         this->create_client<autoware_adapi_v1_msgs::srv::ChangeOperationMode>(
             "/api/operation_mode/change_to_autonomous");
@@ -45,10 +46,15 @@ AutowareHandler::AutowareHandler(float init_x, float init_y, float init_h,
         this->create_publisher<autoware_perception_msgs::msg::PredictedObjects>(
             "/perception/object_recognition/objects", 10);
 
-    this->control_command_subscriber_ =
+    this->sub_control_command_ =
         this->create_subscription<autoware_control_msgs::msg::Control>(
             "/control/command/control_cmd", 10,
             std::bind(&AutowareHandler::control_command_callback_, this,
+                      std::placeholders::_1));
+    this->sub_autoware_state_ =
+        this->create_subscription<autoware_system_msgs::msg::AutowareState>(
+            "/autoware/state", 10,
+            std::bind(&AutowareHandler::autoware_state_callback_, this,
                       std::placeholders::_1));
 
     this->srv_control_mode_command_ =
@@ -68,12 +74,24 @@ AutowareHandler::AutowareHandler(float init_x, float init_y, float init_h,
 
     this->timer_ = this->create_wall_timer(
         10ms, std::bind(&AutowareHandler::timer_callback, this));
-
-    this->publish_initialpose_(init_x, init_y, init_h);
-    this->publish_goalpose_(goal_x, goal_y, goal_h);
-    this->engage_timer_ = this->create_wall_timer(
-        10s, std::bind(&AutowareHandler::engage_autoware_, this));
 }
+
+void AutowareHandler::set_initial_pose(float x, float y, float h) {
+    this->init_x = x;
+    this->init_y = y;
+    this->init_h = h;
+    this->set_ego_pose(init_x, init_y, init_h);
+    this->publish_initialpose_(init_x, init_y, init_h);
+}
+
+void AutowareHandler::set_goal_pose(float x, float y, float h) {
+    this->goal_x = x;
+    this->goal_y = y;
+    this->goal_h = h;
+    this->publish_goalpose_(goal_x, goal_y, goal_h);
+}
+
+void AutowareHandler::engage() { this->engage_autoware_(); }
 
 void AutowareHandler::set_ego_pose(float x, float y, float h) {
     this->prev_ego_pose2 = this->prev_ego_pose;
@@ -165,17 +183,10 @@ void AutowareHandler::publish_goalpose_callback_(
 }
 
 void AutowareHandler::engage_autoware_() {
-    if (this->engaged) {
-        return;
-    }
-    while (!this->engage_autoware_client_->wait_for_service(1s)) {
-        if (!rclcpp::ok()) {
-            RCLCPP_ERROR(this->get_logger(),
-                         "Interrupted while waiting for the service. Exiting.");
-            return;
-        }
+    if (this->ego_state != EgoState::WAITING_FOR_ENGAGE) {
         RCLCPP_INFO(this->get_logger(),
-                    "Waiting for the service engage_autoware...");
+                    "Not in WAITING_FOR_ENGAGE state, cannot engage.");
+        return;
     }
     auto request = std::make_shared<
         autoware_adapi_v1_msgs::srv::ChangeOperationMode::Request>();
@@ -188,7 +199,6 @@ void AutowareHandler::engage_autoware_() {
             if (response->status.success) {
                 RCLCPP_INFO(this->get_logger(),
                             "Engaged Autoware successfully");
-                this->engaged = true;
             } else {
                 RCLCPP_ERROR(this->get_logger(), "Failed: %s",
                              response->status.message.c_str());
@@ -339,6 +349,42 @@ void AutowareHandler::control_command_callback_(
     this->velocity = msg->longitudinal.velocity;
 }
 
+void AutowareHandler::autoware_state_callback_(
+    const autoware_system_msgs::msg::AutowareState::SharedPtr msg) {
+    this->autoware_state = *msg;
+    if (msg->state == autoware_system_msgs::msg::AutowareState::INITIALIZING) {
+        if (this->ego_state != EgoState::INITIALIZING)
+            RCLCPP_INFO(this->get_logger(), "Ego State: INITIALIZING");
+        this->ego_state = EgoState::INITIALIZING;
+    } else if (msg->state == autoware_system_msgs::msg::AutowareState::
+                                 WAITING_FOR_ROUTE ||
+               msg->state ==
+                   autoware_system_msgs::msg::AutowareState::PLANNING) {
+        if (this->ego_state != EgoState::PLANNING)
+            RCLCPP_INFO(this->get_logger(), "Ego State: PLANNING");
+        this->ego_state = EgoState::PLANNING;
+    } else if (msg->state ==
+               autoware_system_msgs::msg::AutowareState::WAITING_FOR_ENGAGE) {
+        if (this->ego_state != EgoState::WAITING_FOR_ENGAGE)
+            RCLCPP_INFO(this->get_logger(), "Ego State: WAITING_FOR_ENGAGE");
+        this->ego_state = EgoState::WAITING_FOR_ENGAGE;
+    } else if (msg->state ==
+               autoware_system_msgs::msg::AutowareState::DRIVING) {
+        if (this->ego_state != EgoState::DRIVING)
+            RCLCPP_INFO(this->get_logger(), "Ego State: DRIVING");
+        this->ego_state = EgoState::DRIVING;
+    } else if (msg->state ==
+                   autoware_system_msgs::msg::AutowareState::ARRIVED_GOAL ||
+               msg->state ==
+                   autoware_system_msgs::msg::AutowareState::FINALIZING) {
+        if (this->ego_state != EgoState::FINALIZED)
+            RCLCPP_INFO(this->get_logger(), "Ego State: FINALIZED");
+        this->ego_state = EgoState::FINALIZED;
+    } else {
+        this->ego_state = EgoState::UNKNOWN;
+    }
+}
+
 void AutowareHandler::control_mode_command_callback_(
     const autoware_vehicle_msgs::srv::ControlModeCommand::Request::
         ConstSharedPtr request,
@@ -350,11 +396,11 @@ void AutowareHandler::control_mode_command_callback_(
 }
 
 void AutowareHandler::timer_callback() {
-    RCLCPP_INFO_THROTTLE(this->get_logger(), *this->get_clock(), 5000,
+    RCLCPP_INFO_THROTTLE(this->get_logger(), *this->get_clock(), 1000,
                          "Velocity: %f, Rotation: %f", this->velocity,
                          this->rotation);
-    RCLCPP_INFO_THROTTLE(this->get_logger(), *this->get_clock(), 5000,
-                         "Ego State: %f, %f, %f", this->ego_pose.x,
+    RCLCPP_INFO_THROTTLE(this->get_logger(), *this->get_clock(), 1000,
+                         "Ego Pose: %f, %f, %f", this->ego_pose.x,
                          this->ego_pose.y, this->ego_pose.h);
     this->publish_control_mode_();
     this->publish_gear_report_();

@@ -14,9 +14,12 @@ config_params:
   yq e '\
     (.launch[] | select(.arg.name == "launch_speed_bump_module") | .arg.default) = "true"\
   ' -i /autoware/src/launcher/autoware_launch/autoware_launch/config/planning/preset/default_preset.yaml
-build pkg:
+
+clean pkg:
   rm -rf /autoware/install/{{pkg}}
   rm -rf /autoware/build/{{pkg}}
+
+build pkg:
   {{source_aw}} && \
     cd /autoware && \
     colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release --packages-select {{pkg}}

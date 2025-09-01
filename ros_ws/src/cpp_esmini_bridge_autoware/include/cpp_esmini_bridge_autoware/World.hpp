@@ -2,6 +2,7 @@
 
 #include "cpp_esmini_bridge_autoware/AutowareHandler.hpp"
 #include "cpp_esmini_bridge_autoware/EgoState.hpp"
+#include "cpp_esmini_bridge_autoware/RateLimiter.hpp"
 #include "esminiLib.hpp"
 #include "rclcpp/rclcpp.hpp"
 
@@ -16,6 +17,7 @@ class World : public rclcpp::Node {
     EgoState ego_state;
 
     rclcpp::TimerBase::SharedPtr timer_;
+    RateLimiter limiter;
 
     void *vehicleHandle = 0;
     SE_SimpleVehicleState vehicleState = {0, 0, 0, 0, 0, 0, 0, 0};
@@ -23,4 +25,7 @@ class World : public rclcpp::Node {
 
     void esmini_init();
     void timer_callback();
+
+    void set_ego_route();
+    void tick();
 };

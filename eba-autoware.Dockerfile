@@ -1,6 +1,7 @@
 FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
+ENV RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
 
 RUN <<EOF
 apt-get update
@@ -18,9 +19,22 @@ export ROS_APT_SOURCE_VERSION=$(curl -s https://api.github.com/repos/ros-infrast
 curl -L -o /tmp/ros2-apt-source.deb "https://github.com/ros-infrastructure/ros-apt-source/releases/download/${ROS_APT_SOURCE_VERSION}/ros2-apt-source_${ROS_APT_SOURCE_VERSION}.$(. /etc/os-release && echo $VERSION_CODENAME)_all.deb"
 dpkg -i /tmp/ros2-apt-source.deb
 apt update
-apt install -y ros-humble-desktop python3-rosdep python3-colcon-common-extensions
+apt install -y \
+  ros-humble-desktop \
+  python3-rosdep \
+  python3-colcon-common-extensions \
+  ros-humble-rmw-cyclonedds-cpp
 rm -rf /var/lib/apt/lists/*
 EOF
+
+RUN <<EOF
+apt-get update
+apt-get -y full-upgrade
+apt-get install -y --no-install-recommends \
+  ros-humble-rmw-cyclonedds-cpp
+rm -rf /var/lib/apt/lists/*
+EOF
+
 
 WORKDIR /autoware
 ADD https://github.com/autowarefoundation/autoware.git#7914486293cad67543f36a4edd59dbc6dee56156 /autoware
