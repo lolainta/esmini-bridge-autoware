@@ -14,6 +14,5 @@ int main(int argc, char **argv) {
         RCLCPP_ERROR(world->get_logger(), "Exception: %s", e.what());
     }
     rclcpp::shutdown();
-
     return 0;
 }

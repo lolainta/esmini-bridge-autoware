@@ -33,13 +33,16 @@ typedef struct EgoPose {
 
 class AutowareHandler : public rclcpp::Node {
   public:
-    AutowareHandler(float, float, float, float, float, float);
+    AutowareHandler();
 
-    float get_velocity() const { return velocity; }
-    float get_rotation() const { return rotation; }
+    void set_initial_pose(float, float, float);
+    void set_goal_pose(float, float, float);
+    float get_velocity() const { return this->velocity; }
+    float get_rotation() const { return this->rotation; }
     void set_ego_pose(float, float, float);
     void set_object(int, float, float, float, float);
-    EgoState get_ego_state() const { return ego_state; }
+    void engage();
+    EgoState get_state() const { return this->ego_state; }
 
   private:
     float init_x, init_y, init_h;
@@ -59,7 +62,6 @@ class AutowareHandler : public rclcpp::Node {
 
     float velocity = 0.0;
     float rotation = 0.0;
-    bool engaged = false;
 
     rclcpp::Publisher<geometry_msgs::msg::PoseWithCovarianceStamped>::SharedPtr
         initialpose_publisher_;
