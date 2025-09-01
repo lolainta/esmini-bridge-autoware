@@ -1,6 +1,15 @@
 FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
+ENV RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+
+RUN <<EOF
+apt-get update
+apt-get -y full-upgrade
+apt-get install -y --no-install-recommends \
+  ros-humble-rmw-cyclonedds-cpp
+rm -rf /var/lib/apt/lists/*
+EOF
 
 RUN <<EOF
 apt-get update
