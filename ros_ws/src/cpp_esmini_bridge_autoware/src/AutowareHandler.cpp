@@ -369,12 +369,12 @@ void AutowareHandler::control_mode_command_callback_(
 }
 
 void AutowareHandler::timer_callback() {
-    RCLCPP_INFO_THROTTLE(this->get_logger(), *this->get_clock(), 1000,
-                         "Velocity: %f, Rotation: %f", this->velocity,
-                         this->rotation);
-    RCLCPP_INFO_THROTTLE(this->get_logger(), *this->get_clock(), 1000,
-                         "Ego Pose: %f, %f, %f", this->ego_pose.x,
-                         this->ego_pose.y, this->ego_pose.h);
+    RCLCPP_DEBUG_THROTTLE(this->get_logger(), *this->get_clock(), 1000,
+                          "Velocity: %f, Rotation: %f", this->velocity,
+                          this->rotation);
+    RCLCPP_DEBUG_THROTTLE(this->get_logger(), *this->get_clock(), 1000,
+                          "Ego Pose: %f, %f, %f", this->ego_pose.x,
+                          this->ego_pose.y, this->ego_pose.h);
     this->publish_control_mode_();
     this->publish_gear_report_();
     this->publish_steering_();

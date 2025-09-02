@@ -20,9 +20,8 @@ void World::esmini_init() {
     // SE_Init("/esmini/resources/xosc/cut-in.xosc", 0, 1, 0, 0);
     // SE_Init("/resources/xosc/chengyu/SinD_test1.xosc", 1, 1, 0, 0);
     // SE_Init("/resources/xosc/yusheng/145.xosc", 1, 1, 0, 1);
-    auto ret = SE_Init("/resources/xosc/chengyu/01FL-KEEP_02FR-TL_254.xosc", 1,
-                       1, 0, 1);
-    RCLCPP_INFO(this->get_logger(), "ret: %d", ret);
+    assert(SE_Init("/resources/xosc/chengyu/01FL-KEEP_02FR-TL_254.xosc", 1, 1,
+                   0, 1) == 0);
     SE_CollisionDetection(true);
     SE_GetObjectState(0, &this->objectState);
     vehicleHandle = SE_SimpleVehicleCreate(
@@ -31,12 +30,59 @@ void World::esmini_init() {
     SE_SimpleVehicleSteeringRate(vehicleHandle, 9.0f);
     SE_SimpleVehicleSetThrottleDisabled(vehicleHandle, true);
     // SE_ViewerShowFeature(4 + 8, true);
+    try {
+        this->config_scenario();
+    } catch (const std::exception &e) {
+        RCLCPP_ERROR(this->get_logger(), "Error configuring scenario: %s",
+                     e.what());
+    }
+}
+
+void World::config_scenario() {
+    size_t n = SE_GetNumberOfParameters();
+    RCLCPP_INFO(this->get_logger(), "Number of parameters: %zu", n);
+    for (size_t i = 0; i < n; ++i) {
+        int type;
+        std::string name(SE_GetParameterName(i, &type));
+        switch (type) {
+        case 1:
+            int value_int;
+            assert(SE_GetParameterInt(name.c_str(), &value_int) == 0);
+            RCLCPP_INFO(this->get_logger(), "Parameter %zu: %s (int) = %d", i,
+                        name.c_str(), value_int);
+            break;
+        case 2:
+            double value_double;
+            assert(SE_GetParameterDouble(name.c_str(), &value_double) == 0);
+            RCLCPP_INFO(this->get_logger(), "Parameter %zu: %s (double) = %lf",
+                        i, name.c_str(), value_double);
+            break;
+        case 3:
+            const char *value_string;
+            assert(SE_GetParameterString(name.c_str(), &value_string) == 0);
+            RCLCPP_INFO(this->get_logger(), "Parameter %zu: %s (string) = %s",
+                        i, name.c_str(), value_string);
+            break;
+        case 4:
+            bool value_bool;
+            assert(SE_GetParameterBool(name.c_str(), &value_bool) == 0);
+            RCLCPP_INFO(this->get_logger(), "Parameter %zu: %s (bool) = %s", i,
+                        name.c_str(), value_bool ? "true" : "false");
+            break;
+        default:
+            RCLCPP_ERROR(this->get_logger(),
+                         "Parameter %zu: %s (type %d) is not supported", i,
+                         name.c_str(), type);
+            break;
+        }
+    }
+    return;
 }
 
 void World::timer_callback() {
-    RCLCPP_INFO_THROTTLE(this->get_logger(), *this->get_clock(), 1000,
-                         "Ego State: %d",
-                         static_cast<int>(this->ego->get_state()));
+    RCLCPP_DEBUG_THROTTLE(this->get_logger(), *this->get_clock(), 1000,
+                          "Ego State: %d",
+                          static_cast<int>(this->ego->get_state()));
     switch (this->ego->get_state()) {
     case EgoState::INITIALIZING:
         limiter.call([this] { this->set_ego_route(); });
@@ -57,8 +103,8 @@ void World::timer_callback() {
 void World::set_ego_route() {
     SE_ScenarioObjectState ego_pose;
     SE_GetObjectState(0, &ego_pose);
-    RCLCPP_INFO(this->get_logger(), "Ego State: %f, %f, %f", ego_pose.x,
-                ego_pose.y, ego_pose.h);
+    RCLCPP_DEBUG(this->get_logger(), "Ego State: %f, %f, %f", ego_pose.x,
+                 ego_pose.y, ego_pose.h);
     this->ego->set_initial_pose(ego_pose.x, ego_pose.y, ego_pose.h);
     // this->ego->set_goal_pose(6.5, 299.6, 1.57);
     // this->ego->set_goal_pose(52.5, 11.6, 6.28);
@@ -70,9 +116,9 @@ void World::tick() {
     SE_SimpleVehicleControlAnalog(vehicleHandle, dt, 0,
                                   this->ego->get_rotation());
     SE_SimpleVehicleSetSpeed(vehicleHandle, this->ego->get_velocity());
-    RCLCPP_INFO_THROTTLE(this->get_logger(), *this->get_clock(), 5000,
-                         "Throttle: %f, Rotation: %f",
-                         this->ego->get_velocity(), this->ego->get_rotation());
+    RCLCPP_DEBUG_THROTTLE(this->get_logger(), *this->get_clock(), 5000,
+                          "Throttle: %f, Rotation: %f",
+                          this->ego->get_velocity(), this->ego->get_rotation());
     SE_SimpleVehicleGetState(vehicleHandle, &vehicleState);
     RCLCPP_INFO_THROTTLE(this->get_logger(), *this->get_clock(), 1000,
                          "Number of objects: %d", SE_GetNumberOfObjects());
@@ -92,8 +138,8 @@ void World::tick() {
                                vehicleState.wheel_angle);
     SE_ReportObjectSpeed(0, vehicleState.speed);
     SE_StepDT(dt);
-    RCLCPP_INFO_THROTTLE(this->get_logger(), *this->get_clock(), 10000,
-                         "Vehicle State: %f, %f, %f", vehicleState.x,
-                         vehicleState.y, vehicleState.h);
+    RCLCPP_DEBUG_THROTTLE(this->get_logger(), *this->get_clock(), 10000,
+                          "Vehicle State: %f, %f, %f", vehicleState.x,
+                          vehicleState.y, vehicleState.h);
     this->ego->set_ego_pose(vehicleState.x, vehicleState.y, vehicleState.h);
 }
