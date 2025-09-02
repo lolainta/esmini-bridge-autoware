@@ -62,15 +62,6 @@ AutowareHandler::AutowareHandler()
             "/control/control_mode_request",
             std::bind(&AutowareHandler::control_mode_command_callback_, this,
                       std::placeholders::_1, std::placeholders::_2));
-    this->srv_publish_initialpose_ =
-        this->create_service<std_srvs::srv::Trigger>(
-            "/publish_initialpose",
-            std::bind(&AutowareHandler::publish_initialpose_callback_, this,
-                      std::placeholders::_1, std::placeholders::_2));
-    this->srv_publish_goalpose_ = this->create_service<std_srvs::srv::Trigger>(
-        "/publish_goalpose",
-        std::bind(&AutowareHandler::publish_goalpose_callback_, this,
-                  std::placeholders::_1, std::placeholders::_2));
 
     this->timer_ = this->create_wall_timer(
         10ms, std::bind(&AutowareHandler::timer_callback, this));
@@ -300,13 +291,13 @@ void AutowareHandler::set_object(int id, float x, float y, float h, float v) {
     autoware_perception_msgs::msg::PredictedObject predict_obj;
     autoware_perception_msgs::msg::ObjectClassification classification;
 
-    float diff_x = x - this->ego_pose.x;
-    float diff_y = y - this->ego_pose.y;
-    float rel_h = h - this->ego_pose.h;
-    float rel_x =
-        cos(-this->ego_pose.h) * diff_x - sin(-this->ego_pose.h) * diff_y;
-    float rel_y =
-        sin(-this->ego_pose.h) * diff_x + cos(-this->ego_pose.h) * diff_y;
+    // float diff_x = x - this->ego_pose.x;
+    // float diff_y = y - this->ego_pose.y;
+    // float rel_h = h - this->ego_pose.h;
+    // float rel_x =
+    //     cos(-this->ego_pose.h) * diff_x - sin(-this->ego_pose.h) * diff_y;
+    // float rel_y =
+    //     sin(-this->ego_pose.h) * diff_x + cos(-this->ego_pose.h) * diff_y;
     classification.label =
         autoware_perception_msgs::msg::ObjectClassification::CAR;
     classification.probability = 1.0;

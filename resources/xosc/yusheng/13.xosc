@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="utf-8"?>
+<OpenSCENARIO xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="OpenScenario.xsd">
+    <FileHeader description="Scenario_B_ACCELERATION" author="YS" revMajor="1" revMinor="2" date="2025-04-11T14:44:58.823497"/>
+    <ParameterDeclarations>
+        <ParameterDeclaration name="Ego_Skin" parameterType="string" value="car_white"/>
+        <ParameterDeclaration name="Ego_Speed" parameterType="double" value="30.0"/>
+        <ParameterDeclaration name="Ego_Offset" parameterType="double" value="0.0"/>
+        <ParameterDeclaration name="Ego_Ds" parameterType="double" value="0.0"/>
+        <ParameterDeclaration name="Agent_Skin" parameterType="string" value="car_red"/>
+        <ParameterDeclaration name="Agent_Speed" parameterType="double" value="30.0"/>
+        <ParameterDeclaration name="Agent_Offset" parameterType="double" value="0.0"/>
+        <ParameterDeclaration name="Agent_Ds" parameterType="double" value="0.0"/>
+        <ParameterDeclaration name="Agent_Target_Speed" parameterType="double" value="50"/>
+        <ParameterDeclaration name="Agent_Speed_Change_Duration" parameterType="double" value="1"/>
+    </ParameterDeclarations>
+    <CatalogLocations>
+        <VehicleCatalog>
+            <Directory path="./Catalogs/Vehicles"/>
+        </VehicleCatalog>
+        <PedestrianCatalog>
+            <Directory path="./Catalogs/Pedestrians"/>
+        </PedestrianCatalog>
+        <ControllerCatalog>
+            <Directory path="./Catalogs/Controllers"/>
+        </ControllerCatalog>
+    </CatalogLocations>
+    <RoadNetwork>
+        <LogicFile filepath="./Maps/straight_3000m.xodr"/>
+    </RoadNetwork>
+    <Entities>
+        <ScenarioObject name="Ego">
+            <CatalogReference catalogName="VehicleCatalog" entryName="$Ego_Skin"/>
+        </ScenarioObject>
+        <ScenarioObject name="Agent">
+            <CatalogReference catalogName="VehicleCatalog" entryName="$Agent_Skin"/>
+        </ScenarioObject>
+    </Entities>
+    <Storyboard>
+        <Init>
+            <Actions>
+                <Private entityRef="Ego">
+                    <PrivateAction>
+                        <TeleportAction>
+                            <Position>
+                                <LanePosition roadId="1" laneId="-1" s="${100 + $Ego_Ds}" offset="$Ego_Offset"/>
+                            </Position>
+                        </TeleportAction>
+                    </PrivateAction>
+                    <PrivateAction>
+                        <ControllerAction>
+                            <ActivateControllerAction lateral="true" longitudinal="true"/>
+                        </ControllerAction>
+                    </PrivateAction>
+                    <PrivateAction>
+                        <LongitudinalAction>
+                            <SpeedAction>
+                                <SpeedActionDynamics dynamicsShape="step" value="0.0" dynamicsDimension="time"/>
+                                <SpeedActionTarget>
+                                    <AbsoluteTargetSpeed value="${$Ego_Speed / 3.6}"/>
+                                </SpeedActionTarget>
+                            </SpeedAction>
+                        </LongitudinalAction>
+                    </PrivateAction>
+                    <PrivateAction>
+                        <RoutingAction>
+                            <AcquirePositionAction>
+                                <Position>
+                                    <LanePosition roadId="1" laneId="-2" s="300.0" offset="$Ego_Offset"/>
+                                </Position>
+                            </AcquirePositionAction>
+                        </RoutingAction>
+                    </PrivateAction>
+                </Private>
+                <Private entityRef="Agent">
+                    <PrivateAction>
+                        <TeleportAction>
+                            <Position>
+                                <LanePosition roadId="1" laneId="-1" s="${80.0 + $Agent_Ds}" offset="$Agent_Offset"/>
+                            </Position>
+                        </TeleportAction>
+                    </PrivateAction>
+                    <PrivateAction>
+                        <LongitudinalAction>
+                            <SpeedAction>
+                                <SpeedActionDynamics dynamicsShape="step" value="0.0" dynamicsDimension="time"/>
+                                <SpeedActionTarget>
+                                    <AbsoluteTargetSpeed value="${$Agent_Speed / 3.6}"/>
+                                </SpeedActionTarget>
+                            </SpeedAction>
+                        </LongitudinalAction>
+                    </PrivateAction>
+                </Private>
+            </Actions>
+        </Init>
+        <Story name="story_act_maneuvuergroup_Agent_Maneuver_B_ACCELERATION">
+            <Act name="act_maneuvuergroup_Agent_Maneuver_B_ACCELERATION">
+                <ManeuverGroup name="maneuvuergroup_Agent_Maneuver_B_ACCELERATION" maximumExecutionCount="1">
+                    <Actors selectTriggeringEntities="false">
+                        <EntityRef entityRef="Agent"/>
+                    </Actors>
+                    <Maneuver name="Agent_Maneuver_B_ACCELERATION">
+                        <Event name="Agent_Event" priority="parallel" maximumExecutionCount="1">
+                            <Action name="Agent_GoStraight">
+                                <PrivateAction>
+                                    <LongitudinalAction>
+                                        <SpeedAction>
+                                            <SpeedActionDynamics dynamicsShape="linear" value="$Agent_Speed_Change_Duration" dynamicsDimension="time"/>
+                                            <SpeedActionTarget>
+                                                <AbsoluteTargetSpeed value="${$Agent_Target_Speed / 3.6}"/>
+                                            </SpeedActionTarget>
+                                        </SpeedAction>
+                                    </LongitudinalAction>
+                                </PrivateAction>
+                            </Action>
+                            <StartTrigger>
+                                <ConditionGroup>
+                                    <Condition name="simulationtime" delay="0.0" conditionEdge="rising">
+                                        <ByValueCondition>
+                                            <SimulationTimeCondition value="1.0" rule="greaterThan"/>
+                                        </ByValueCondition>
+                                    </Condition>
+                                </ConditionGroup>
+                            </StartTrigger>
+                        </Event>
+                    </Maneuver>
+                </ManeuverGroup>
+                <StartTrigger>
+                    <ConditionGroup>
+                        <Condition name="act_start" delay="0.0" conditionEdge="rising">
+                            <ByValueCondition>
+                                <SimulationTimeCondition value="0.0" rule="greaterThan"/>
+                            </ByValueCondition>
+                        </Condition>
+                    </ConditionGroup>
+                </StartTrigger>
+                <StopTrigger/>
+            </Act>
+        </Story>
+        <StopTrigger>
+            <ConditionGroup>
+                <Condition name="EgoApproachEndWp" delay="0.0" conditionEdge="rising">
+                    <ByEntityCondition>
+                        <TriggeringEntities triggeringEntitiesRule="any">
+                            <EntityRef entityRef="Ego"/>
+                        </TriggeringEntities>
+                        <EntityCondition>
+                            <ReachPositionCondition tolerance="20.0">
+                                <Position>
+                                    <LanePosition roadId="1" laneId="-2" s="300.0" offset="0.0"/>
+                                </Position>
+                            </ReachPositionCondition>
+                        </EntityCondition>
+                    </ByEntityCondition>
+                </Condition>
+            </ConditionGroup>
+        </StopTrigger>
+    </Storyboard>
+</OpenSCENARIO>

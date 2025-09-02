@@ -1,0 +1,708 @@
+<?xml version='1.0' encoding='utf-8'?>
+<OpenSCENARIO xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="OpenScenario.xsd">
+    <FileHeader description="hct_01FL-KEEP_02FR-TL_254" author="HCIS_ChengYuSheng" revMajor="1" revMinor="0" date="2025-08-12T14:11:51.508726"/>
+    <ParameterDeclarations>
+        <ParameterDeclaration name="AV_CONNECTED" parameterType="boolean" value="false"/>
+        <ParameterDeclaration name="EVENT_START" parameterType="boolean" value="false"/>
+        <ParameterDeclaration name="IS_VALID" parameterType="boolean" value="false"/>
+        <ParameterDeclaration name="AV_CONNECTION_TIMEOUT" parameterType="boolean" value="false"/>
+        <ParameterDeclaration name="WRONG_START_SPEED" parameterType="boolean" value="false"/>
+        <ParameterDeclaration name="EGO_REACHED_END" parameterType="boolean" value="false"/>
+        <ParameterDeclaration name="EGO_TLE" parameterType="boolean" value="false"/>
+        <ParameterDeclaration name="EGO_COLLISION" parameterType="boolean" value="false"/>
+        <ParameterDeclaration name="EGO_STROLL" parameterType="boolean" value="false"/>
+        <ParameterDeclaration name="Ego_Vehicle" parameterType="string" value="car_white"/>
+        <ParameterDeclaration name="Ego_Speed" parameterType="double" value="30"/>
+        <ParameterDeclaration name="Ego_S" parameterType="double" value="65"/>
+        <ParameterDeclaration name="Agent1_Type" parameterType="string" value="car_red"/>
+        <ParameterDeclaration name="Agent1_Speed" parameterType="double" value="40"/>
+        <ParameterDeclaration name="Agent1_S" parameterType="double" value="10"/>
+        <ParameterDeclaration name="Agent1_Offset" parameterType="double" value="0"/>
+        <ParameterDeclaration name="Agent1_1_Delay" parameterType="double" value="0"/>
+        <ParameterDeclaration name="Agent1_1_TA_Offset" parameterType="double" value="0"/>
+        <ParameterDeclaration name="Agent1_1_TA_DynamicDelay" parameterType="double" value="0"/>
+        <ParameterDeclaration name="Agent1_1_TA_DynamicDuration" parameterType="double" value="1"/>
+        <ParameterDeclaration name="Agent1_1_TA_DynamicShape" parameterType="string" value="Straight"/>
+        <ParameterDeclaration name="Agent1_1_SA_EndSpeed" parameterType="double" value="10"/>
+        <ParameterDeclaration name="Agent1_1_SA_DynamicDelay" parameterType="double" value="1"/>
+        <ParameterDeclaration name="Agent1_1_SA_DynamicDuration" parameterType="double" value="3"/>
+        <ParameterDeclaration name="Agent1_1_SA_DynamicShape" parameterType="string" value="linear"/>
+        <ParameterDeclaration name="Agent2_Type" parameterType="string" value="car_red"/>
+        <ParameterDeclaration name="Agent2_Speed" parameterType="double" value="40"/>
+        <ParameterDeclaration name="Agent2_S" parameterType="double" value="10"/>
+        <ParameterDeclaration name="Agent2_Offset" parameterType="double" value="0"/>
+        <ParameterDeclaration name="Agent2_1_Delay" parameterType="double" value="0"/>
+        <ParameterDeclaration name="Agent2_1_TA_Offset" parameterType="double" value="0"/>
+        <ParameterDeclaration name="Agent2_1_TA_DynamicDelay" parameterType="double" value="0"/>
+        <ParameterDeclaration name="Agent2_1_TA_DynamicDuration" parameterType="double" value="1"/>
+        <ParameterDeclaration name="Agent2_1_TA_DynamicShape" parameterType="string" value="Route"/>
+        <ParameterDeclaration name="Agent2_1_SA_EndSpeed" parameterType="double" value="0"/>
+        <ParameterDeclaration name="Agent2_1_SA_DynamicDelay" parameterType="double" value="1"/>
+        <ParameterDeclaration name="Agent2_1_SA_DynamicDuration" parameterType="double" value="1"/>
+        <ParameterDeclaration name="Agent2_1_SA_DynamicShape" parameterType="string" value="sinusoidal"/>
+    </ParameterDeclarations>
+    <CatalogLocations>
+        <VehicleCatalog>
+            <Directory path="../Catalogs/Vehicles"/>
+        </VehicleCatalog>
+        <ControllerCatalog>
+            <Directory path="../Catalogs/Controllers"/>
+        </ControllerCatalog>
+        <PedestrianCatalog>
+            <Directory path="../Catalogs/Pedestrians"/>
+        </PedestrianCatalog>
+    </CatalogLocations>
+    <RoadNetwork>
+        <LogicFile filepath="../../xodr/itri/hct_6.xodr"/>
+    </RoadNetwork>
+    <Entities>
+        <ScenarioObject name="Ego">
+            <CatalogReference catalogName="VehicleCatalog" entryName="$Ego_Vehicle"/>
+            <ObjectController>
+                <Controller name="ROSController">
+                    <Properties>
+                        <Property name="timeGap" value="1.0"/>
+                        <Property name="mode" value="override"/>
+                        <Property name="setSpeed" value="${$Ego_Speed / 3.6}"/>
+                    </Properties>
+                </Controller>
+            </ObjectController>
+        </ScenarioObject>
+        <ScenarioObject name="Agent1">
+            <CatalogReference catalogName="VehicleCatalog" entryName="$Agent1_Type"/>
+            <ObjectController>
+                <Controller name="ALKSController">
+                    <Properties/>
+                </Controller>
+            </ObjectController>
+        </ScenarioObject>
+        <ScenarioObject name="Agent2">
+            <CatalogReference catalogName="VehicleCatalog" entryName="$Agent2_Type"/>
+            <ObjectController>
+                <Controller name="ALKSController">
+                    <Properties/>
+                </Controller>
+            </ObjectController>
+        </ScenarioObject>
+    </Entities>
+    <Storyboard>
+        <Init>
+            <Actions>
+                <Private entityRef="Ego">
+                    <PrivateAction>
+                        <TeleportAction>
+                            <Position>
+                                <LanePosition roadId="121" laneId="1" s="65.0" offset="0.0"/>
+                            </Position>
+                        </TeleportAction>
+                    </PrivateAction>
+                    <PrivateAction>
+                        <ActivateControllerAction lateral="true" longitudinal="true"/>
+                    </PrivateAction>
+                    <PrivateAction>
+                        <RoutingAction>
+                            <AcquirePositionAction>
+                                <Position>
+                                    <LanePosition roadId="144" laneId="-1" s="10.0" offset="0.0"/>
+                                </Position>
+                            </AcquirePositionAction>
+                        </RoutingAction>
+                    </PrivateAction>
+                </Private>
+                <Private entityRef="Agent1">
+                    <PrivateAction>
+                        <TeleportAction>
+                            <Position>
+                                <LanePosition roadId="144" laneId="1" s="$Agent1_S" offset="$Agent1_Offset"/>
+                            </Position>
+                        </TeleportAction>
+                    </PrivateAction>
+                </Private>
+                <Private entityRef="Agent2">
+                    <PrivateAction>
+                        <TeleportAction>
+                            <Position>
+                                <LanePosition roadId="16" laneId="1" s="$Agent2_S" offset="$Agent2_Offset"/>
+                            </Position>
+                        </TeleportAction>
+                    </PrivateAction>
+                </Private>
+            </Actions>
+        </Init>
+        <Story name="story_act_maneuvuergroup_Agent1_Maneuver">
+            <Act name="act_maneuvuergroup_Agent1_Maneuver">
+                <ManeuverGroup name="maneuvuergroup_Agent1_Maneuver" maximumExecutionCount="1">
+                    <Actors selectTriggeringEntities="false">
+                        <EntityRef entityRef="Agent1"/>
+                    </Actors>
+                    <Maneuver name="Agent1_Maneuver">
+                        <Event name="Agent1_StartSpeedEvent" priority="overwrite" maximumExecutionCount="1">
+                            <Action name="Agent1_StartSpeedAction">
+                                <PrivateAction>
+                                    <LongitudinalAction>
+                                        <SpeedAction>
+                                            <SpeedActionDynamics dynamicsShape="step" value="0.0" dynamicsDimension="time"/>
+                                            <SpeedActionTarget>
+                                                <AbsoluteTargetSpeed value="${$Agent1_Speed / 3.6}"/>
+                                            </SpeedActionTarget>
+                                        </SpeedAction>
+                                    </LongitudinalAction>
+                                </PrivateAction>
+                            </Action>
+                            <Action name="Agent1_ActivateController">
+                                <PrivateAction>
+                                    <ActivateControllerAction lateral="true" longitudinal="true"/>
+                                </PrivateAction>
+                            </Action>
+                            <StartTrigger>
+                                <ConditionGroup>
+                                    <Condition name="IS_VALID_Trigger" delay="0.0" conditionEdge="rising">
+                                        <ByValueCondition>
+                                            <ParameterCondition parameterRef="IS_VALID" value="true" rule="equalTo"/>
+                                        </ByValueCondition>
+                                    </Condition>
+                                </ConditionGroup>
+                            </StartTrigger>
+                        </Event>
+                        <Event name="Agent1_Event1_DummyEvent" priority="parallel" maximumExecutionCount="1">
+                            <Action name="Agent1_Event1_DummyAction">
+                                <PrivateAction>
+                                    <VisibilityAction graphics="true" traffic="true" sensors="true"/>
+                                </PrivateAction>
+                            </Action>
+                            <StartTrigger>
+                                <ConditionGroup>
+                                    <Condition name="FollowingPreviosTrigger" delay="$Agent1_1_Delay" conditionEdge="rising">
+                                        <ByValueCondition>
+                                            <StoryboardElementStateCondition storyboardElementType="event" storyboardElementRef="Agent1_StartSpeedEvent" state="completeState"/>
+                                        </ByValueCondition>
+                                    </Condition>
+                                </ConditionGroup>
+                            </StartTrigger>
+                        </Event>
+                        <Event name="Agent1_Event1_TrajectoryEvent" priority="parallel" maximumExecutionCount="1">
+                            <Action name="Agent1_Event1_TrajectoryAction">
+                                <PrivateAction>
+                                    <RoutingAction>
+                                        <FollowTrajectoryAction>
+                                            <Trajectory name="selfDefineTrajectory" closed="false">
+                                                <Shape>
+                                                    <Nurbs order="2">
+                                                        <ControlPoint>
+                                                            <Position>
+                                                                <LanePosition roadId="144" laneId="1" s="$Agent1_S" offset="$Agent1_Offset"/>
+                                                            </Position>
+                                                        </ControlPoint>
+                                                        <ControlPoint>
+                                                            <Position>
+                                                                <LanePosition roadId="121" laneId="-1" s="15.0" offset="${-$Agent1_1_TA_Offset}"/>
+                                                            </Position>
+                                                        </ControlPoint>
+                                                        <Knot value="0"/>
+                                                        <Knot value="0"/>
+                                                        <Knot value="1"/>
+                                                        <Knot value="1"/>
+                                                    </Nurbs>
+                                                </Shape>
+                                            </Trajectory>
+                                            <TimeReference>
+                                                <None/>
+                                            </TimeReference>
+                                            <TrajectoryFollowingMode followingMode="position"/>
+                                        </FollowTrajectoryAction>
+                                    </RoutingAction>
+                                </PrivateAction>
+                            </Action>
+                            <StartTrigger>
+                                <ConditionGroup>
+                                    <Condition name="FollowingPreviosTrigger" delay="$Agent1_1_TA_DynamicDelay" conditionEdge="rising">
+                                        <ByValueCondition>
+                                            <StoryboardElementStateCondition storyboardElementType="event" storyboardElementRef="Agent1_Event1_DummyEvent" state="completeState"/>
+                                        </ByValueCondition>
+                                    </Condition>
+                                </ConditionGroup>
+                            </StartTrigger>
+                        </Event>
+                        <Event name="Agent1_SpeedEvent" priority="parallel" maximumExecutionCount="1">
+                            <Action name="Agent1_SpeedAction">
+                                <PrivateAction>
+                                    <LongitudinalAction>
+                                        <SpeedAction>
+                                            <SpeedActionDynamics dynamicsShape="$Agent1_1_SA_DynamicShape" value="$Agent1_1_SA_DynamicDuration" dynamicsDimension="time"/>
+                                            <SpeedActionTarget>
+                                                <AbsoluteTargetSpeed value="${$Agent1_1_SA_EndSpeed/3.6}"/>
+                                            </SpeedActionTarget>
+                                        </SpeedAction>
+                                    </LongitudinalAction>
+                                </PrivateAction>
+                            </Action>
+                            <StartTrigger>
+                                <ConditionGroup>
+                                    <Condition name="FollowingPreviosTrigger" delay="$Agent1_1_SA_DynamicDelay" conditionEdge="rising">
+                                        <ByValueCondition>
+                                            <StoryboardElementStateCondition storyboardElementType="event" storyboardElementRef="Agent1_Event1_DummyEvent" state="completeState"/>
+                                        </ByValueCondition>
+                                    </Condition>
+                                </ConditionGroup>
+                            </StartTrigger>
+                        </Event>
+                    </Maneuver>
+                </ManeuverGroup>
+                <StartTrigger>
+                    <ConditionGroup>
+                        <Condition name="act_start" delay="0.0" conditionEdge="rising">
+                            <ByValueCondition>
+                                <SimulationTimeCondition value="0.0" rule="greaterThan"/>
+                            </ByValueCondition>
+                        </Condition>
+                    </ConditionGroup>
+                </StartTrigger>
+                <StopTrigger/>
+            </Act>
+        </Story>
+        <Story name="story_act_maneuvuergroup_Agent2_Maneuver">
+            <Act name="act_maneuvuergroup_Agent2_Maneuver">
+                <ManeuverGroup name="maneuvuergroup_Agent2_Maneuver" maximumExecutionCount="1">
+                    <Actors selectTriggeringEntities="false">
+                        <EntityRef entityRef="Agent2"/>
+                    </Actors>
+                    <Maneuver name="Agent2_Maneuver">
+                        <Event name="Agent2_StartSpeedEvent" priority="overwrite" maximumExecutionCount="1">
+                            <Action name="Agent2_StartSpeedAction">
+                                <PrivateAction>
+                                    <LongitudinalAction>
+                                        <SpeedAction>
+                                            <SpeedActionDynamics dynamicsShape="step" value="0.0" dynamicsDimension="time"/>
+                                            <SpeedActionTarget>
+                                                <AbsoluteTargetSpeed value="${$Agent2_Speed / 3.6}"/>
+                                            </SpeedActionTarget>
+                                        </SpeedAction>
+                                    </LongitudinalAction>
+                                </PrivateAction>
+                            </Action>
+                            <Action name="Agent2_ActivateController">
+                                <PrivateAction>
+                                    <ActivateControllerAction lateral="true" longitudinal="true"/>
+                                </PrivateAction>
+                            </Action>
+                            <StartTrigger>
+                                <ConditionGroup>
+                                    <Condition name="IS_VALID_Trigger" delay="0.0" conditionEdge="rising">
+                                        <ByValueCondition>
+                                            <ParameterCondition parameterRef="IS_VALID" value="true" rule="equalTo"/>
+                                        </ByValueCondition>
+                                    </Condition>
+                                </ConditionGroup>
+                            </StartTrigger>
+                        </Event>
+                        <Event name="Agent2_Event1_DummyEvent" priority="parallel" maximumExecutionCount="1">
+                            <Action name="Agent2_Event1_DummyAction">
+                                <PrivateAction>
+                                    <VisibilityAction graphics="true" traffic="true" sensors="true"/>
+                                </PrivateAction>
+                            </Action>
+                            <StartTrigger>
+                                <ConditionGroup>
+                                    <Condition name="FollowingPreviosTrigger" delay="$Agent2_1_Delay" conditionEdge="rising">
+                                        <ByValueCondition>
+                                            <StoryboardElementStateCondition storyboardElementType="event" storyboardElementRef="Agent2_StartSpeedEvent" state="completeState"/>
+                                        </ByValueCondition>
+                                    </Condition>
+                                </ConditionGroup>
+                            </StartTrigger>
+                        </Event>
+                        <Event name="Agent2_Event1_TrajectoryEvent" priority="parallel" maximumExecutionCount="1">
+                            <Action name="Agent2_Event1_TrajectoryAction">
+                                <PrivateAction>
+                                    <RoutingAction>
+                                        <AcquirePositionAction>
+                                            <Position>
+                                                <LanePosition roadId="121" laneId="-1" s="15.0" offset="${-$Agent2_1_TA_Offset}"/>
+                                            </Position>
+                                        </AcquirePositionAction>
+                                    </RoutingAction>
+                                </PrivateAction>
+                            </Action>
+                            <StartTrigger>
+                                <ConditionGroup>
+                                    <Condition name="FollowingPreviosTrigger" delay="$Agent2_1_TA_DynamicDelay" conditionEdge="rising">
+                                        <ByValueCondition>
+                                            <StoryboardElementStateCondition storyboardElementType="event" storyboardElementRef="Agent2_Event1_DummyEvent" state="completeState"/>
+                                        </ByValueCondition>
+                                    </Condition>
+                                </ConditionGroup>
+                            </StartTrigger>
+                        </Event>
+                        <Event name="Agent2_SpeedEvent" priority="parallel" maximumExecutionCount="1">
+                            <Action name="Agent2_SpeedAction">
+                                <PrivateAction>
+                                    <LongitudinalAction>
+                                        <SpeedAction>
+                                            <SpeedActionDynamics dynamicsShape="$Agent2_1_SA_DynamicShape" value="$Agent2_1_SA_DynamicDuration" dynamicsDimension="time"/>
+                                            <SpeedActionTarget>
+                                                <AbsoluteTargetSpeed value="${$Agent2_1_SA_EndSpeed/3.6}"/>
+                                            </SpeedActionTarget>
+                                        </SpeedAction>
+                                    </LongitudinalAction>
+                                </PrivateAction>
+                            </Action>
+                            <StartTrigger>
+                                <ConditionGroup>
+                                    <Condition name="FollowingPreviosTrigger" delay="$Agent2_1_SA_DynamicDelay" conditionEdge="rising">
+                                        <ByValueCondition>
+                                            <StoryboardElementStateCondition storyboardElementType="event" storyboardElementRef="Agent2_Event1_DummyEvent" state="completeState"/>
+                                        </ByValueCondition>
+                                    </Condition>
+                                </ConditionGroup>
+                            </StartTrigger>
+                        </Event>
+                    </Maneuver>
+                </ManeuverGroup>
+                <StartTrigger>
+                    <ConditionGroup>
+                        <Condition name="act_start" delay="0.0" conditionEdge="rising">
+                            <ByValueCondition>
+                                <SimulationTimeCondition value="0.0" rule="greaterThan"/>
+                            </ByValueCondition>
+                        </Condition>
+                    </ConditionGroup>
+                </StartTrigger>
+                <StopTrigger/>
+            </Act>
+        </Story>
+        <Story name="story_act_maneuvuergroup_ParameterManeuver">
+            <Act name="act_maneuvuergroup_ParameterManeuver">
+                <ManeuverGroup name="maneuvuergroup_ParameterManeuver" maximumExecutionCount="1">
+                    <Actors selectTriggeringEntities="false">
+                        <EntityRef entityRef="Ego"/>
+                    </Actors>
+                    <Maneuver name="ParameterManeuver">
+                        <Event name="DetectEgoHasMovedEvent" priority="parallel" maximumExecutionCount="1">
+                            <Action name="Set EgoHasMoved Flag">
+                                <GlobalAction>
+                                    <ParameterAction parameterRef="AV_CONNECTED">
+                                        <SetAction value="true"/>
+                                    </ParameterAction>
+                                </GlobalAction>
+                            </Action>
+                            <StartTrigger>
+                                <ConditionGroup>
+                                    <Condition name="EgoHasMoved" delay="0.0" conditionEdge="rising">
+                                        <ByEntityCondition>
+                                            <TriggeringEntities triggeringEntitiesRule="any">
+                                                <EntityRef entityRef="Ego"/>
+                                            </TriggeringEntities>
+                                            <EntityCondition>
+                                                <SpeedCondition value="0.0" rule="greaterThan"/>
+                                            </EntityCondition>
+                                        </ByEntityCondition>
+                                    </Condition>
+                                </ConditionGroup>
+                            </StartTrigger>
+                        </Event>
+                        <Event name="ValidManeuverEvent" priority="parallel" maximumExecutionCount="1">
+                            <Action name="Set Valid Flag">
+                                <GlobalAction>
+                                    <ParameterAction parameterRef="IS_VALID">
+                                        <SetAction value="true"/>
+                                    </ParameterAction>
+                                </GlobalAction>
+                            </Action>
+                            <StartTrigger>
+                                <ConditionGroup>
+                                    <Condition name="EgoApproachInitWp" delay="0.0" conditionEdge="rising">
+                                        <ByEntityCondition>
+                                            <TriggeringEntities triggeringEntitiesRule="any">
+                                                <EntityRef entityRef="Ego"/>
+                                            </TriggeringEntities>
+                                            <EntityCondition>
+                                                <ReachPositionCondition tolerance="2.0">
+                                                    <Position>
+                                                        <LanePosition roadId="121" laneId="1" s="30.0" offset="0.0"/>
+                                                    </Position>
+                                                </ReachPositionCondition>
+                                            </EntityCondition>
+                                        </ByEntityCondition>
+                                    </Condition>
+                                    <Condition name="EgoRightStartSpeed" delay="0.0" conditionEdge="none">
+                                        <ByEntityCondition>
+                                            <TriggeringEntities triggeringEntitiesRule="any">
+                                                <EntityRef entityRef="Ego"/>
+                                            </TriggeringEntities>
+                                            <EntityCondition>
+                                                <SpeedCondition value="${$Ego_Speed/3.6-1.3888888888888888}" rule="greaterThan"/>
+                                            </EntityCondition>
+                                        </ByEntityCondition>
+                                    </Condition>
+                                    <Condition name="EgoRightStartSpeed" delay="0.0" conditionEdge="none">
+                                        <ByEntityCondition>
+                                            <TriggeringEntities triggeringEntitiesRule="any">
+                                                <EntityRef entityRef="Ego"/>
+                                            </TriggeringEntities>
+                                            <EntityCondition>
+                                                <SpeedCondition value="${$Ego_Speed/3.6+1.3888888888888888}" rule="lessThan"/>
+                                            </EntityCondition>
+                                        </ByEntityCondition>
+                                    </Condition>
+                                </ConditionGroup>
+                            </StartTrigger>
+                        </Event>
+                        <Event name="DetectAVConnectionTimeoutEvent" priority="parallel" maximumExecutionCount="1">
+                            <Action name="Set AV Connection Timeout Flag">
+                                <GlobalAction>
+                                    <ParameterAction parameterRef="AV_CONNECTION_TIMEOUT">
+                                        <SetAction value="true"/>
+                                    </ParameterAction>
+                                </GlobalAction>
+                            </Action>
+                            <StartTrigger>
+                                <ConditionGroup>
+                                    <Condition name="EgoTimeout" delay="0.0" conditionEdge="none">
+                                        <ByValueCondition>
+                                            <SimulationTimeCondition value="30.0" rule="greaterThan"/>
+                                        </ByValueCondition>
+                                    </Condition>
+                                    <Condition name="EgoHasNotMoved" delay="0.0" conditionEdge="none">
+                                        <ByValueCondition>
+                                            <ParameterCondition parameterRef="AV_CONNECTED" value="false" rule="equalTo"/>
+                                        </ByValueCondition>
+                                    </Condition>
+                                </ConditionGroup>
+                            </StartTrigger>
+                        </Event>
+                        <Event name="DetectHighStartSpeedEvent" priority="parallel" maximumExecutionCount="1">
+                            <Action name="Set High Start Speed Flag">
+                                <GlobalAction>
+                                    <ParameterAction parameterRef="WRONG_START_SPEED">
+                                        <SetAction value="true"/>
+                                    </ParameterAction>
+                                </GlobalAction>
+                            </Action>
+                            <StartTrigger>
+                                <ConditionGroup>
+                                    <Condition name="EgoApproachInitWp" delay="0.0" conditionEdge="rising">
+                                        <ByEntityCondition>
+                                            <TriggeringEntities triggeringEntitiesRule="any">
+                                                <EntityRef entityRef="Ego"/>
+                                            </TriggeringEntities>
+                                            <EntityCondition>
+                                                <ReachPositionCondition tolerance="2.0">
+                                                    <Position>
+                                                        <LanePosition roadId="121" laneId="1" s="30.0" offset="0.0"/>
+                                                    </Position>
+                                                </ReachPositionCondition>
+                                            </EntityCondition>
+                                        </ByEntityCondition>
+                                    </Condition>
+                                    <Condition name="EgoWrongStartSpeed_high" delay="0.0" conditionEdge="none">
+                                        <ByEntityCondition>
+                                            <TriggeringEntities triggeringEntitiesRule="any">
+                                                <EntityRef entityRef="Ego"/>
+                                            </TriggeringEntities>
+                                            <EntityCondition>
+                                                <SpeedCondition value="${$Ego_Speed/3.6+0.5555555555555556}" rule="greaterThan"/>
+                                            </EntityCondition>
+                                        </ByEntityCondition>
+                                    </Condition>
+                                </ConditionGroup>
+                            </StartTrigger>
+                        </Event>
+                        <Event name="DetectLowStartSpeedEvent" priority="parallel" maximumExecutionCount="1">
+                            <Action name="Set Low Start Speed Flag">
+                                <GlobalAction>
+                                    <ParameterAction parameterRef="WRONG_START_SPEED">
+                                        <SetAction value="true"/>
+                                    </ParameterAction>
+                                </GlobalAction>
+                            </Action>
+                            <StartTrigger>
+                                <ConditionGroup>
+                                    <Condition name="EgoApproachInitWp" delay="0.0" conditionEdge="rising">
+                                        <ByEntityCondition>
+                                            <TriggeringEntities triggeringEntitiesRule="any">
+                                                <EntityRef entityRef="Ego"/>
+                                            </TriggeringEntities>
+                                            <EntityCondition>
+                                                <ReachPositionCondition tolerance="2.0">
+                                                    <Position>
+                                                        <LanePosition roadId="121" laneId="1" s="30.0" offset="0.0"/>
+                                                    </Position>
+                                                </ReachPositionCondition>
+                                            </EntityCondition>
+                                        </ByEntityCondition>
+                                    </Condition>
+                                    <Condition name="EgoWrongStartSpeed_low" delay="0.0" conditionEdge="none">
+                                        <ByEntityCondition>
+                                            <TriggeringEntities triggeringEntitiesRule="any">
+                                                <EntityRef entityRef="Ego"/>
+                                            </TriggeringEntities>
+                                            <EntityCondition>
+                                                <SpeedCondition value="${$Ego_Speed/3.6-0.5555555555555556}" rule="lessThan"/>
+                                            </EntityCondition>
+                                        </ByEntityCondition>
+                                    </Condition>
+                                </ConditionGroup>
+                            </StartTrigger>
+                        </Event>
+                        <Event name="DetectEgoReachedEndEvent" priority="parallel" maximumExecutionCount="1">
+                            <Action name="Set Ego Reached End Flag">
+                                <GlobalAction>
+                                    <ParameterAction parameterRef="EGO_REACHED_END">
+                                        <SetAction value="true"/>
+                                    </ParameterAction>
+                                </GlobalAction>
+                            </Action>
+                            <StartTrigger>
+                                <ConditionGroup>
+                                    <Condition name="EgoApproachEndWp" delay="0.0" conditionEdge="rising">
+                                        <ByEntityCondition>
+                                            <TriggeringEntities triggeringEntitiesRule="any">
+                                                <EntityRef entityRef="Ego"/>
+                                            </TriggeringEntities>
+                                            <EntityCondition>
+                                                <ReachPositionCondition tolerance="2.0">
+                                                    <Position>
+                                                        <LanePosition roadId="144" laneId="-1" s="10.0" offset="0.0"/>
+                                                    </Position>
+                                                </ReachPositionCondition>
+                                            </EntityCondition>
+                                        </ByEntityCondition>
+                                    </Condition>
+                                </ConditionGroup>
+                            </StartTrigger>
+                        </Event>
+                        <Event name="DetectEgoTLEEvent" priority="parallel" maximumExecutionCount="1">
+                            <Action name="Set Ego TLE Flag">
+                                <GlobalAction>
+                                    <ParameterAction parameterRef="EGO_TLE">
+                                        <SetAction value="true"/>
+                                    </ParameterAction>
+                                </GlobalAction>
+                            </Action>
+                            <StartTrigger>
+                                <ConditionGroup>
+                                    <Condition name="EgoTLE" delay="20.0" conditionEdge="rising">
+                                        <ByEntityCondition>
+                                            <TriggeringEntities triggeringEntitiesRule="any">
+                                                <EntityRef entityRef="Ego"/>
+                                            </TriggeringEntities>
+                                            <EntityCondition>
+                                                <ReachPositionCondition tolerance="2.0">
+                                                    <Position>
+                                                        <LanePosition roadId="121" laneId="1" s="30.0" offset="0.0"/>
+                                                    </Position>
+                                                </ReachPositionCondition>
+                                            </EntityCondition>
+                                        </ByEntityCondition>
+                                    </Condition>
+                                </ConditionGroup>
+                            </StartTrigger>
+                        </Event>
+                        <Event name="DetectEgoCollisionEvent" priority="parallel" maximumExecutionCount="1">
+                            <Action name="Set Ego Collision Flag">
+                                <GlobalAction>
+                                    <ParameterAction parameterRef="EGO_COLLISION">
+                                        <SetAction value="true"/>
+                                    </ParameterAction>
+                                </GlobalAction>
+                            </Action>
+                            <StartTrigger>
+                                <ConditionGroup>
+                                    <Condition name="EgoCollision" delay="0.0" conditionEdge="rising">
+                                        <ByEntityCondition>
+                                            <TriggeringEntities triggeringEntitiesRule="any">
+                                                <EntityRef entityRef="Ego"/>
+                                            </TriggeringEntities>
+                                            <EntityCondition>
+                                                <CollisionCondition>
+                                                    <ByType type="vehicle"/>
+                                                </CollisionCondition>
+                                            </EntityCondition>
+                                        </ByEntityCondition>
+                                    </Condition>
+                                </ConditionGroup>
+                            </StartTrigger>
+                        </Event>
+                        <Event name="EgoStrollEvent" priority="parallel" maximumExecutionCount="1">
+                            <Action name="Set Ego Stroll Flag">
+                                <GlobalAction>
+                                    <ParameterAction parameterRef="EGO_STROLL">
+                                        <SetAction value="true"/>
+                                    </ParameterAction>
+                                </GlobalAction>
+                            </Action>
+                            <StartTrigger>
+                                <ConditionGroup>
+                                    <Condition name="EgoStroll" delay="20.0" conditionEdge="none">
+                                        <ByValueCondition>
+                                            <ParameterCondition parameterRef="AV_CONNECTED" value="true" rule="equalTo"/>
+                                        </ByValueCondition>
+                                    </Condition>
+                                    <Condition name="EventStarted" delay="0.0" conditionEdge="none">
+                                        <ByValueCondition>
+                                            <ParameterCondition parameterRef="IS_VALID" value="false" rule="equalTo"/>
+                                        </ByValueCondition>
+                                    </Condition>
+                                </ConditionGroup>
+                            </StartTrigger>
+                        </Event>
+                    </Maneuver>
+                </ManeuverGroup>
+                <StartTrigger>
+                    <ConditionGroup>
+                        <Condition name="act_start" delay="0.0" conditionEdge="rising">
+                            <ByValueCondition>
+                                <SimulationTimeCondition value="0.0" rule="greaterThan"/>
+                            </ByValueCondition>
+                        </Condition>
+                    </ConditionGroup>
+                </StartTrigger>
+                <StopTrigger/>
+            </Act>
+        </Story>
+        <StopTrigger>
+            <ConditionGroup>
+                <Condition name="AV_CONNECTION_TIMEOUT_Trigger" delay="0.0" conditionEdge="rising">
+                    <ByValueCondition>
+                        <ParameterCondition parameterRef="AV_CONNECTION_TIMEOUT" value="true" rule="equalTo"/>
+                    </ByValueCondition>
+                </Condition>
+            </ConditionGroup>
+            <ConditionGroup>
+                <Condition name="WRONG_START_SPEED_Trigger" delay="0.0" conditionEdge="rising">
+                    <ByValueCondition>
+                        <ParameterCondition parameterRef="WRONG_START_SPEED" value="true" rule="equalTo"/>
+                    </ByValueCondition>
+                </Condition>
+            </ConditionGroup>
+            <ConditionGroup>
+                <Condition name="EGO_REACHED_END_Trigger" delay="0.0" conditionEdge="rising">
+                    <ByValueCondition>
+                        <ParameterCondition parameterRef="EGO_REACHED_END" value="true" rule="equalTo"/>
+                    </ByValueCondition>
+                </Condition>
+            </ConditionGroup>
+            <ConditionGroup>
+                <Condition name="EGO_TLE_Trigger" delay="0.0" conditionEdge="rising">
+                    <ByValueCondition>
+                        <ParameterCondition parameterRef="EGO_TLE" value="true" rule="equalTo"/>
+                    </ByValueCondition>
+                </Condition>
+            </ConditionGroup>
+            <ConditionGroup>
+                <Condition name="EGO_COLLISION_Trigger" delay="0.0" conditionEdge="rising">
+                    <ByValueCondition>
+                        <ParameterCondition parameterRef="EGO_COLLISION" value="true" rule="equalTo"/>
+                    </ByValueCondition>
+                </Condition>
+            </ConditionGroup>
+            <ConditionGroup>
+                <Condition name="EGO_STROLL_Trigger" delay="0.0" conditionEdge="rising">
+                    <ByValueCondition>
+                        <ParameterCondition parameterRef="EGO_STROLL" value="true" rule="equalTo"/>
+                    </ByValueCondition>
+                </Condition>
+            </ConditionGroup>
+        </StopTrigger>
+    </Storyboard>
+</OpenSCENARIO>

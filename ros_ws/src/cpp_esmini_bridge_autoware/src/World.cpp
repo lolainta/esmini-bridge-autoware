@@ -40,10 +40,8 @@ void World::timer_callback() {
         limiter.call([this] { this->set_ego_route(); });
         break;
     case EgoState::PLANNING:
-        // limiter.call([this] { this->set_ego_route(); });
         break;
     case EgoState::WAITING_FOR_ENGAGE:
-        // this->ego->engage();
         limiter.call([this] { this->ego->engage(); });
         break;
     case EgoState::DRIVING:
@@ -76,7 +74,6 @@ void World::tick() {
     RCLCPP_INFO_THROTTLE(this->get_logger(), *this->get_clock(), 1000,
                          "Number of objects: %d", SE_GetNumberOfObjects());
     for (int i = 1; i < SE_GetNumberOfObjects(); i++) {
-        // SE_ScenarioObjectState objectState;
         SE_GetObjectState(SE_GetId(i), &this->objectState);
         RCLCPP_INFO_THROTTLE(this->get_logger(), *this->get_clock(), 5000,
                              "Object %d: %f, %f, %f, Speed: %f",

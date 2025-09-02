@@ -1,4 +1,5 @@
 #pragma once
+
 #include <unordered_map>
 
 #include "autoware_adapi_v1_msgs/srv/change_operation_mode.hpp"
@@ -97,9 +98,6 @@ class AutowareHandler : public rclcpp::Node {
     rclcpp::Service<autoware_vehicle_msgs::srv::ControlModeCommand>::SharedPtr
         srv_control_mode_command_;
 
-    rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr srv_publish_initialpose_;
-    rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr srv_publish_goalpose_;
-
     rclcpp::TimerBase::SharedPtr timer_;
     rclcpp::TimerBase::SharedPtr engage_timer_;
 
@@ -107,12 +105,6 @@ class AutowareHandler : public rclcpp::Node {
 
     void publish_initialpose_(float, float, float);
     void publish_goalpose_(float, float, float);
-    void publish_initialpose_callback_(
-        const std_srvs::srv::Trigger::Request::ConstSharedPtr,
-        std_srvs::srv::Trigger::Response::SharedPtr);
-    void publish_goalpose_callback_(
-        const std_srvs::srv::Trigger::Request::ConstSharedPtr,
-        std_srvs::srv::Trigger::Response::SharedPtr);
     void engage_autoware_();
 
     void publish_control_mode_();
