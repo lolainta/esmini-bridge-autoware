@@ -5,7 +5,8 @@
 int main(int argc, char **argv) {
     rclcpp::init(argc, argv);
     auto world = std::make_shared<World>();
-    rclcpp::executors::MultiThreadedExecutor executor;
+    rclcpp::executors::MultiThreadedExecutor executor(rclcpp::ExecutorOptions(),
+                                                      12);
     executor.add_node(world);
     executor.add_node(world->get_ego());
     try {

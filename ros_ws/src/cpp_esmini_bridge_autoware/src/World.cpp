@@ -19,8 +19,10 @@ void World::esmini_init() {
 
     // SE_Init("/esmini/resources/xosc/cut-in.xosc", 0, 1, 0, 0);
     // SE_Init("/resources/xosc/chengyu/SinD_test1.xosc", 1, 1, 0, 0);
-    SE_Init("/resources/xosc/yusheng/145.xosc", 1, 1, 0, 1);
-    // SE_Init("/resources/xosc/chengyu/1.xosc", 1, 1, 0, 1);
+    // SE_Init("/resources/xosc/yusheng/145.xosc", 1, 1, 0, 1);
+    auto ret = SE_Init("/resources/xosc/chengyu/01FL-KEEP_02FR-TL_254.xosc", 1,
+                       1, 0, 1);
+    RCLCPP_INFO(this->get_logger(), "ret: %d", ret);
     SE_CollisionDetection(true);
     SE_GetObjectState(0, &this->objectState);
     vehicleHandle = SE_SimpleVehicleCreate(
@@ -58,8 +60,9 @@ void World::set_ego_route() {
     RCLCPP_INFO(this->get_logger(), "Ego State: %f, %f, %f", ego_pose.x,
                 ego_pose.y, ego_pose.h);
     this->ego->set_initial_pose(ego_pose.x, ego_pose.y, ego_pose.h);
-    this->ego->set_goal_pose(6.5, 299.6, 1.57);
+    // this->ego->set_goal_pose(6.5, 299.6, 1.57);
     // this->ego->set_goal_pose(52.5, 11.6, 6.28);
+    this->ego->set_goal_pose(678.5, -28.6, 1.7);
 }
 
 void World::tick() {

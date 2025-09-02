@@ -155,24 +155,6 @@ void AutowareHandler::publish_goalpose_(float x, float y, float h) {
     this->goalpose_publisher_->publish(goalpose);
 }
 
-void AutowareHandler::publish_initialpose_callback_(
-    const std_srvs::srv::Trigger::Request::ConstSharedPtr request,
-    std_srvs::srv::Trigger::Response::SharedPtr response) {
-    RCLCPP_INFO(this->get_logger(), "Publishing initialpose...");
-    this->publish_initialpose_(init_x, init_y, init_h);
-    response->success = true;
-    response->message = "Initialpose published";
-}
-
-void AutowareHandler::publish_goalpose_callback_(
-    const std_srvs::srv::Trigger::Request::ConstSharedPtr request,
-    std_srvs::srv::Trigger::Response::SharedPtr response) {
-    RCLCPP_INFO(this->get_logger(), "Publishing goalpose...");
-    this->publish_goalpose_(goal_x, goal_y, goal_h);
-    response->success = true;
-    response->message = "Goalpose published";
-}
-
 void AutowareHandler::engage_autoware_() {
     if (this->ego_state != EgoState::WAITING_FOR_ENGAGE) {
         RCLCPP_INFO(this->get_logger(),
