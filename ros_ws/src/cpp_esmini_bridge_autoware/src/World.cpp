@@ -2,7 +2,38 @@
 #include "cpp_esmini_bridge_autoware/AutowareHandler.hpp"
 #include "esminiLib.hpp"
 #include <chrono>
+
 using namespace std::chrono_literals;
+
+void parameter_callback(void *) {
+    assert(SE_SetParameterDouble("Agent1_Offset", 5) == 0);
+    size_t n = SE_GetNumberOfParameters();
+    for (size_t i = 0; i < n; ++i) {
+        int type;
+        std::string name(SE_GetParameterName(i, &type));
+        switch (type) {
+        case 1:
+            int value_int;
+            assert(SE_GetParameterInt(name.c_str(), &value_int) == 0);
+            break;
+        case 2:
+            double value_double;
+            assert(SE_GetParameterDouble(name.c_str(), &value_double) == 0);
+            break;
+        case 3:
+            const char *value_string;
+            assert(SE_GetParameterString(name.c_str(), &value_string) == 0);
+            break;
+        case 4:
+            bool value_bool;
+            assert(SE_GetParameterBool(name.c_str(), &value_bool) == 0);
+            break;
+        default:
+            break;
+        }
+    }
+    return;
+}
 
 World::World()
     : Node("World"), ego_state(EgoState::INITIALIZING), limiter(10s) {
@@ -15,6 +46,9 @@ World::World()
 }
 
 void World::esmini_init() {
+    SE_SetOptionValue("text_scale", "2");
+    SE_SetWindowPosAndSize(0, 0, 1600, 900);
+    SE_RegisterParameterDeclarationCallback(parameter_callback, 0);
     SE_AddPath("/esmini/resources/xosc/");
 
     // SE_Init("/esmini/resources/xosc/cut-in.xosc", 0, 1, 0, 0);
@@ -30,59 +64,12 @@ void World::esmini_init() {
     SE_SimpleVehicleSteeringRate(vehicleHandle, 9.0f);
     SE_SimpleVehicleSetThrottleDisabled(vehicleHandle, true);
     // SE_ViewerShowFeature(4 + 8, true);
-    try {
-        this->config_scenario();
-    } catch (const std::exception &e) {
-        RCLCPP_ERROR(this->get_logger(), "Error configuring scenario: %s",
-                     e.what());
-    }
-}
-
-void World::config_scenario() {
-    size_t n = SE_GetNumberOfParameters();
-    RCLCPP_INFO(this->get_logger(), "Number of parameters: %zu", n);
-    for (size_t i = 0; i < n; ++i) {
-        int type;
-        std::string name(SE_GetParameterName(i, &type));
-        switch (type) {
-        case 1:
-            int value_int;
-            assert(SE_GetParameterInt(name.c_str(), &value_int) == 0);
-            RCLCPP_INFO(this->get_logger(), "Parameter %zu: %s (int) = %d", i,
-                        name.c_str(), value_int);
-            break;
-        case 2:
-            double value_double;
-            assert(SE_GetParameterDouble(name.c_str(), &value_double) == 0);
-            RCLCPP_INFO(this->get_logger(), "Parameter %zu: %s (double) = %lf",
-                        i, name.c_str(), value_double);
-            break;
-        case 3:
-            const char *value_string;
-            assert(SE_GetParameterString(name.c_str(), &value_string) == 0);
-            RCLCPP_INFO(this->get_logger(), "Parameter %zu: %s (string) = %s",
-                        i, name.c_str(), value_string);
-            break;
-        case 4:
-            bool value_bool;
-            assert(SE_GetParameterBool(name.c_str(), &value_bool) == 0);
-            RCLCPP_INFO(this->get_logger(), "Parameter %zu: %s (bool) = %s", i,
-                        name.c_str(), value_bool ? "true" : "false");
-            break;
-        default:
-            RCLCPP_ERROR(this->get_logger(),
-                         "Parameter %zu: %s (type %d) is not supported", i,
-                         name.c_str(), type);
-            break;
-        }
-    }
-    return;
 }
 
 void World::timer_callback() {
-    RCLCPP_DEBUG_THROTTLE(this->get_logger(), *this->get_clock(), 1000,
-                          "Ego State: %d",
-                          static_cast<int>(this->ego->get_state()));
+    RCLCPP_INFO_THROTTLE(this->get_logger(), *this->get_clock(), 1000,
+                         "Ego State: %d",
+                         static_cast<int>(this->ego->get_state()));
     switch (this->ego->get_state()) {
     case EgoState::INITIALIZING:
         limiter.call([this] { this->set_ego_route(); });
@@ -94,6 +81,9 @@ void World::timer_callback() {
         break;
     case EgoState::DRIVING:
         this->tick();
+        break;
+    case EgoState::FINALIZED:
+        RCLCPP_INFO(this->get_logger(), "Ego State: FINALIZED");
         break;
     default:
         break;
@@ -120,8 +110,8 @@ void World::tick() {
                           "Throttle: %f, Rotation: %f",
                           this->ego->get_velocity(), this->ego->get_rotation());
     SE_SimpleVehicleGetState(vehicleHandle, &vehicleState);
-    RCLCPP_INFO_THROTTLE(this->get_logger(), *this->get_clock(), 1000,
-                         "Number of objects: %d", SE_GetNumberOfObjects());
+    RCLCPP_DEBUG_THROTTLE(this->get_logger(), *this->get_clock(), 1000,
+                          "Number of objects: %d", SE_GetNumberOfObjects());
     for (int i = 1; i < SE_GetNumberOfObjects(); i++) {
         SE_GetObjectState(SE_GetId(i), &this->objectState);
         RCLCPP_INFO_THROTTLE(this->get_logger(), *this->get_clock(), 5000,

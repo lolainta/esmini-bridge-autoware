@@ -25,7 +25,6 @@ class World : public rclcpp::Node {
 
     void esmini_init();
     void timer_callback();
-    void config_scenario();
 
     void set_ego_route();
     void tick();
