@@ -14,7 +14,6 @@ EOF
 
 RUN <<EOF
 add-apt-repository universe -y
-
 export ROS_APT_SOURCE_VERSION=$(curl -s https://api.github.com/repos/ros-infrastructure/ros-apt-source/releases/latest | grep -F "tag_name" | awk -F\" '{print $4}')
 curl -L -o /tmp/ros2-apt-source.deb "https://github.com/ros-infrastructure/ros-apt-source/releases/download/${ROS_APT_SOURCE_VERSION}/ros2-apt-source_${ROS_APT_SOURCE_VERSION}.$(. /etc/os-release && echo $VERSION_CODENAME)_all.deb"
 dpkg -i /tmp/ros2-apt-source.deb
@@ -27,18 +26,8 @@ apt install -y \
 rm -rf /var/lib/apt/lists/*
 EOF
 
-RUN <<EOF
-apt-get update
-apt-get -y full-upgrade
-apt-get install -y --no-install-recommends \
-  ros-humble-rmw-cyclonedds-cpp
-rm -rf /var/lib/apt/lists/*
-EOF
-
-
 WORKDIR /autoware
 ADD https://github.com/autowarefoundation/autoware.git#7914486293cad67543f36a4edd59dbc6dee56156 /autoware
-
 
 RUN <<EOF
 mkdir src

@@ -10,6 +10,4 @@ tar xz
 mv ${YQ_BINARY} /usr/bin/yq
 EOF
 
-#COPY ./resources /resources
-#COPY ./autoware_ws /autoware_ws
 WORKDIR /autoware_ws

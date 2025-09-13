@@ -5,21 +5,27 @@ source_ws := 'source ./install/setup.bash'
 source_aw := 'source /autoware/install/setup.bash'
 
 default:
+  just build
   just run
 
 deps:
   apt update
   {{source_ros}} && rosdep install --from-path src --ignore-src -y
 
-build: deps
+build:
   {{source_ros}} && colcon build
 
 clean:
   rm -rf install/ build/ log/
 
-run: build
+run:
   {{source_ros}} && {{source_aw}} && {{source_ws}} && \
     ros2 launch cpp_esmini_bridge_autoware main.yaml
+
+test:
+  {{source_ros}} && {{source_aw}} && {{source_ws}} && \
+    ros2 launch cpp_esmini_bridge_autoware test.yaml
+
 
 debug: build
   {{source_ros}} && {{source_ws}} && \

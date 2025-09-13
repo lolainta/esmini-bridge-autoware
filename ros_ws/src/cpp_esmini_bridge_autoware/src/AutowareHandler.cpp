@@ -17,6 +17,9 @@ AutowareHandler::AutowareHandler()
     this->engage_autoware_client_ =
         this->create_client<autoware_adapi_v1_msgs::srv::ChangeOperationMode>(
             "/api/operation_mode/change_to_autonomous");
+    this->stop_autoware_client_ =
+        this->create_client<autoware_adapi_v1_msgs::srv::ChangeOperationMode>(
+            "/api/operation_mode/change_to_stop");
 
     this->pub_control_mode_ =
         this->create_publisher<autoware_vehicle_msgs::msg::ControlModeReport>(
@@ -62,15 +65,6 @@ AutowareHandler::AutowareHandler()
             "/control/control_mode_request",
             std::bind(&AutowareHandler::control_mode_command_callback_, this,
                       std::placeholders::_1, std::placeholders::_2));
-    this->srv_publish_initialpose_ =
-        this->create_service<std_srvs::srv::Trigger>(
-            "/publish_initialpose",
-            std::bind(&AutowareHandler::publish_initialpose_callback_, this,
-                      std::placeholders::_1, std::placeholders::_2));
-    this->srv_publish_goalpose_ = this->create_service<std_srvs::srv::Trigger>(
-        "/publish_goalpose",
-        std::bind(&AutowareHandler::publish_goalpose_callback_, this,
-                  std::placeholders::_1, std::placeholders::_2));
 
     this->timer_ = this->create_wall_timer(
         10ms, std::bind(&AutowareHandler::timer_callback, this));
@@ -92,6 +86,8 @@ void AutowareHandler::set_goal_pose(float x, float y, float h) {
 }
 
 void AutowareHandler::engage() { this->engage_autoware_(); }
+
+void AutowareHandler::stop() { this->stop_autoware_(); }
 
 void AutowareHandler::set_ego_pose(float x, float y, float h) {
     this->prev_ego_pose2 = this->prev_ego_pose;
@@ -164,24 +160,6 @@ void AutowareHandler::publish_goalpose_(float x, float y, float h) {
     this->goalpose_publisher_->publish(goalpose);
 }
 
-void AutowareHandler::publish_initialpose_callback_(
-    const std_srvs::srv::Trigger::Request::ConstSharedPtr request,
-    std_srvs::srv::Trigger::Response::SharedPtr response) {
-    RCLCPP_INFO(this->get_logger(), "Publishing initialpose...");
-    this->publish_initialpose_(init_x, init_y, init_h);
-    response->success = true;
-    response->message = "Initialpose published";
-}
-
-void AutowareHandler::publish_goalpose_callback_(
-    const std_srvs::srv::Trigger::Request::ConstSharedPtr request,
-    std_srvs::srv::Trigger::Response::SharedPtr response) {
-    RCLCPP_INFO(this->get_logger(), "Publishing goalpose...");
-    this->publish_goalpose_(goal_x, goal_y, goal_h);
-    response->success = true;
-    response->message = "Goalpose published";
-}
-
 void AutowareHandler::engage_autoware_() {
     if (this->ego_state != EgoState::WAITING_FOR_ENGAGE) {
         RCLCPP_INFO(this->get_logger(),
@@ -199,6 +177,24 @@ void AutowareHandler::engage_autoware_() {
             if (response->status.success) {
                 RCLCPP_INFO(this->get_logger(),
                             "Engaged Autoware successfully");
+            } else {
+                RCLCPP_ERROR(this->get_logger(), "Failed: %s",
+                             response->status.message.c_str());
+            }
+        });
+}
+
+void AutowareHandler::stop_autoware_() {
+    auto request = std::make_shared<
+        autoware_adapi_v1_msgs::srv::ChangeOperationMode::Request>();
+    auto future = this->stop_autoware_client_->async_send_request(
+        request,
+        [this](
+            rclcpp::Client<autoware_adapi_v1_msgs::srv::ChangeOperationMode>::
+                SharedFuture result) {
+            auto response = result.get();
+            if (response->status.success) {
+                RCLCPP_INFO(this->get_logger(), "Stop Autoware successfully");
             } else {
                 RCLCPP_ERROR(this->get_logger(), "Failed: %s",
                              response->status.message.c_str());
@@ -300,13 +296,13 @@ void AutowareHandler::set_object(int id, float x, float y, float h, float v) {
     autoware_perception_msgs::msg::PredictedObject predict_obj;
     autoware_perception_msgs::msg::ObjectClassification classification;
 
-    float diff_x = x - this->ego_pose.x;
-    float diff_y = y - this->ego_pose.y;
-    float rel_h = h - this->ego_pose.h;
-    float rel_x =
-        cos(-this->ego_pose.h) * diff_x - sin(-this->ego_pose.h) * diff_y;
-    float rel_y =
-        sin(-this->ego_pose.h) * diff_x + cos(-this->ego_pose.h) * diff_y;
+    // float diff_x = x - this->ego_pose.x;
+    // float diff_y = y - this->ego_pose.y;
+    // float rel_h = h - this->ego_pose.h;
+    // float rel_x =
+    //     cos(-this->ego_pose.h) * diff_x - sin(-this->ego_pose.h) * diff_y;
+    // float rel_y =
+    //     sin(-this->ego_pose.h) * diff_x + cos(-this->ego_pose.h) * diff_y;
     classification.label =
         autoware_perception_msgs::msg::ObjectClassification::CAR;
     classification.probability = 1.0;
@@ -396,12 +392,12 @@ void AutowareHandler::control_mode_command_callback_(
 }
 
 void AutowareHandler::timer_callback() {
-    RCLCPP_INFO_THROTTLE(this->get_logger(), *this->get_clock(), 1000,
-                         "Velocity: %f, Rotation: %f", this->velocity,
-                         this->rotation);
-    RCLCPP_INFO_THROTTLE(this->get_logger(), *this->get_clock(), 1000,
-                         "Ego Pose: %f, %f, %f", this->ego_pose.x,
-                         this->ego_pose.y, this->ego_pose.h);
+    RCLCPP_DEBUG_THROTTLE(this->get_logger(), *this->get_clock(), 1000,
+                          "Velocity: %f, Rotation: %f", this->velocity,
+                          this->rotation);
+    RCLCPP_DEBUG_THROTTLE(this->get_logger(), *this->get_clock(), 1000,
+                          "Ego Pose: %f, %f, %f", this->ego_pose.x,
+                          this->ego_pose.y, this->ego_pose.h);
     this->publish_control_mode_();
     this->publish_gear_report_();
     this->publish_steering_();
