@@ -6,7 +6,7 @@
 using namespace std::chrono_literals;
 
 void parameter_callback(void *) {
-    assert(SE_SetParameterDouble("Agent1_Offset", 5) == 0);
+    // assert(SE_SetParameterDouble("Agent1_Offset", 5) == 0);
     size_t n = SE_GetNumberOfParameters();
     for (size_t i = 0; i < n; ++i) {
         int type;
@@ -36,7 +36,7 @@ void parameter_callback(void *) {
 }
 
 World::World()
-    : Node("World"), ego_state(EgoState::INITIALIZING), limiter(10s) {
+    : Node("World"), world_state(WorldState::AV_CONNECTING), limiter(10s) {
     RCLCPP_INFO(this->get_logger(), "World Node Initialized");
     this->esmini_init();
     RCLCPP_INFO(this->get_logger(), "Esmini Initialized");
@@ -45,45 +45,75 @@ World::World()
         this->create_wall_timer(10ms, std::bind(&World::timer_callback, this));
 }
 
-void World::esmini_init() {
+void World::esmini_opts() {
     SE_SetOptionValue("text_scale", "2");
-    SE_SetWindowPosAndSize(0, 0, 1600, 900);
+    SE_SetWindowPosAndSize(1600, 900, 1600, 900);
     SE_RegisterParameterDeclarationCallback(parameter_callback, 0);
     SE_AddPath("/esmini/resources/xosc/");
-
-    // SE_Init("/esmini/resources/xosc/cut-in.xosc", 0, 1, 0, 0);
-    // SE_Init("/resources/xosc/chengyu/SinD_test1.xosc", 1, 1, 0, 0);
-    // SE_Init("/resources/xosc/yusheng/145.xosc", 1, 1, 0, 1);
-    assert(SE_Init("/resources/xosc/chengyu/01FL-KEEP_02FR-TL_254.xosc", 1, 1,
-                   0, 1) == 0);
     SE_CollisionDetection(true);
+}
+
+void World::esmini_init() {
+    esmini_opts();
+    // std::string xosc = "/esmini/resources/xosc/cut-in.xosc";
+    // std::string xosc = "/resources/xosc/chengyu/SinD_test1.xosc";
+    // std::string xosc = "/resources/xosc/yusheng/145.xosc";
+    std::string xosc =
+        "/resources/xosc/chengyu/para_test01FR-ZZ_02FR-CI_2.xosc";
+    assert(SE_Init(xosc.c_str(), 1, 1, 0, 1) == 0);
     SE_GetObjectState(0, &this->objectState);
-    vehicleHandle = SE_SimpleVehicleCreate(
+    this->vehicleHandle = SE_SimpleVehicleCreate(
         this->objectState.x, this->objectState.y, this->objectState.h,
         this->objectState.length, this->objectState.speed);
-    SE_SimpleVehicleSteeringRate(vehicleHandle, 9.0f);
-    SE_SimpleVehicleSetThrottleDisabled(vehicleHandle, true);
-    // SE_ViewerShowFeature(4 + 8, true);
+    SE_SimpleVehicleSteeringRate(this->vehicleHandle, 9.0f);
+    SE_SimpleVehicleSetThrottleDisabled(this->vehicleHandle, true);
+}
+
+void World::esmini_close() {
+    SE_SimpleVehicleDelete(this->vehicleHandle);
+    SE_Close();
 }
 
 void World::timer_callback() {
-    RCLCPP_INFO_THROTTLE(this->get_logger(), *this->get_clock(), 1000,
-                         "Ego State: %d",
-                         static_cast<int>(this->ego->get_state()));
-    switch (this->ego->get_state()) {
-    case EgoState::INITIALIZING:
+    RCLCPP_INFO_THROTTLE(this->get_logger(), *this->get_clock(), 3000,
+                         "World State: %d",
+                         static_cast<int>(this->world_state));
+
+    switch (this->world_state) {
+    case WorldState::AV_CONNECTING:
+        if (this->ego->get_state() != EgoState::UNKNOWN) {
+            RCLCPP_INFO(this->get_logger(),
+                        "WorldState: AV_CONNECTING -> WAITING_FOR_PLANNING");
+            this->world_state = WorldState::WAITING_FOR_PLANNING;
+        }
+        break;
+    case WorldState::WAITING_FOR_PLANNING:
         limiter.call([this] { this->set_ego_route(); });
+        if (this->ego->get_state() == EgoState::WAITING_FOR_ENGAGE) {
+            this->world_state = WorldState::ENGAGING;
+            RCLCPP_INFO(this->get_logger(),
+                        "WorldState: WAITING_FOR_PLANNING -> ENGAGING");
+        }
         break;
-    case EgoState::PLANNING:
-        break;
-    case EgoState::WAITING_FOR_ENGAGE:
+    case WorldState::ENGAGING:
         limiter.call([this] { this->ego->engage(); });
+        if (this->ego->get_state() == EgoState::DRIVING) {
+            this->world_state = WorldState::RUNNING;
+            RCLCPP_INFO(this->get_logger(), "WorldState: ENGAGING -> RUNNING");
+        }
         break;
-    case EgoState::DRIVING:
+    case WorldState::RUNNING:
+        if (SE_GetQuitFlag()) {
+            this->ego->stop();
+            this->world_state = WorldState::STOPPED;
+        }
         this->tick();
         break;
-    case EgoState::FINALIZED:
-        RCLCPP_INFO(this->get_logger(), "Ego State: FINALIZED");
+    case WorldState::STOPPED:
+        RCLCPP_INFO(this->get_logger(), "WorldState: STOPPED");
+        esmini_close();
+        this->world_state = WorldState::AV_CONNECTING;
+        esmini_init();
         break;
     default:
         break;

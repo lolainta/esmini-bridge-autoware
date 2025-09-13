@@ -1,6 +1,6 @@
 #pragma once
 
-typedef enum EgoState {
+typedef enum class EgoState {
     INITIALIZING,
     PLANNING,
     WAITING_FOR_ENGAGE,
