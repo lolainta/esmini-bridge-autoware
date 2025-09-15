@@ -2,45 +2,36 @@
 <OpenSCENARIO xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="OpenScenario.xsd">
     <FileHeader description="hct_01FR-ZZ_02FR-CI_2" author="HCIS_ChengYuSheng" revMajor="1"
-        revMinor="0" date="2025-08-12T14:11:51.520120" />
+        revMinor="2" date="2025-09-15T15:44:52.920312" />
     <ParameterDeclarations>
-        <ParameterDeclaration name="AV_CONNECTED" parameterType="boolean" value="false" />
-        <ParameterDeclaration name="EVENT_START" parameterType="boolean" value="false" />
-        <ParameterDeclaration name="IS_VALID" parameterType="boolean" value="false" />
-        <ParameterDeclaration name="AV_CONNECTION_TIMEOUT" parameterType="boolean" value="false" />
-        <ParameterDeclaration name="WRONG_START_SPEED" parameterType="boolean" value="false" />
-        <ParameterDeclaration name="EGO_REACHED_END" parameterType="boolean" value="false" />
-        <ParameterDeclaration name="EGO_TLE" parameterType="boolean" value="false" />
-        <ParameterDeclaration name="EGO_COLLISION" parameterType="boolean" value="false" />
-        <ParameterDeclaration name="EGO_STROLL" parameterType="boolean" value="false" />
         <ParameterDeclaration name="Ego_Vehicle" parameterType="string" value="car_white" />
         <ParameterDeclaration name="Ego_Speed" parameterType="double" value="30" />
-        <ParameterDeclaration name="Ego_S" parameterType="double" value="10" />
+        <ParameterDeclaration name="Ego_S" parameterType="double" value="15" />
         <ParameterDeclaration name="Agent1_Type" parameterType="string" value="car_red" />
-        <ParameterDeclaration name="Agent1_Speed" parameterType="double" value="40" />
-        <ParameterDeclaration name="Agent1_S" parameterType="double" value="65" />
+        <ParameterDeclaration name="Agent1_Speed" parameterType="double" value="0" />
+        <ParameterDeclaration name="Agent1_S" parameterType="double" value="90" />
         <ParameterDeclaration name="Agent1_Offset" parameterType="double" value="0" />
         <ParameterDeclaration name="Agent1_1_Delay" parameterType="double" value="0" />
         <ParameterDeclaration name="Agent1_1_TA_Offset" parameterType="double" value="1.5" />
         <ParameterDeclaration name="Agent1_1_TA_Period" parameterType="double" value="0.3" />
         <ParameterDeclaration name="Agent1_1_TA_Times" parameterType="double" value="3" />
-        <ParameterDeclaration name="Agent1_1_SA_DynamicDelay" parameterType="double" value="1" />
+        <ParameterDeclaration name="Agent1_1_SA_DynamicDelay" parameterType="double" value="0" />
         <ParameterDeclaration name="Agent1_1_SA_DynamicShape" parameterType="double" value="linear" />
-        <ParameterDeclaration name="Agent1_1_SA_DynamicDuration" parameterType="double" value="3" />
+        <ParameterDeclaration name="Agent1_1_SA_DynamicDuration" parameterType="double" value="2" />
         <ParameterDeclaration name="Agent1_1_SA_EndSpeed" parameterType="double" value="40" />
         <ParameterDeclaration name="Agent2_Type" parameterType="string" value="bicycle" />
-        <ParameterDeclaration name="Agent2_Speed" parameterType="double" value="40" />
-        <ParameterDeclaration name="Agent2_S" parameterType="double" value="65" />
-        <ParameterDeclaration name="Agent2_Offset" parameterType="double" value="1.5" />
+        <ParameterDeclaration name="Agent2_Speed" parameterType="double" value="0" />
+        <ParameterDeclaration name="Agent2_S" parameterType="double" value="90" />
+        <ParameterDeclaration name="Agent2_Offset" parameterType="double" value="-1.5" />
         <ParameterDeclaration name="Agent2_1_Delay" parameterType="double" value="0" />
         <ParameterDeclaration name="Agent2_1_TA_Offset" parameterType="double" value="0" />
         <ParameterDeclaration name="Agent2_1_TA_DynamicDelay" parameterType="double" value="0" />
         <ParameterDeclaration name="Agent2_1_TA_DynamicDuration" parameterType="double" value="2.5" />
         <ParameterDeclaration name="Agent2_1_TA_DynamicShape" parameterType="string"
             value="sinusoidal" />
-        <ParameterDeclaration name="Agent2_1_SA_EndSpeed" parameterType="double" value="10" />
-        <ParameterDeclaration name="Agent2_1_SA_DynamicDelay" parameterType="double" value="1" />
-        <ParameterDeclaration name="Agent2_1_SA_DynamicDuration" parameterType="double" value="3" />
+        <ParameterDeclaration name="Agent2_1_SA_EndSpeed" parameterType="double" value="40" />
+        <ParameterDeclaration name="Agent2_1_SA_DynamicDelay" parameterType="double" value="0" />
+        <ParameterDeclaration name="Agent2_1_SA_DynamicDuration" parameterType="double" value="2" />
         <ParameterDeclaration name="Agent2_1_SA_DynamicShape" parameterType="string" value="linear" />
     </ParameterDeclarations>
     <CatalogLocations>
@@ -61,13 +52,7 @@
         <ScenarioObject name="Ego">
             <CatalogReference catalogName="VehicleCatalog" entryName="$Ego_Vehicle" />
             <ObjectController>
-                <Controller name="ROSController">
-                    <Properties>
-                        <Property name="timeGap" value="1.0" />
-                        <Property name="mode" value="override" />
-                        <Property name="setSpeed" value="${$Ego_Speed / 3.6}" />
-                    </Properties>
-                </Controller>
+                <CatalogReference catalogName="ControllerCatalog" entryName="ACCController" />
             </ObjectController>
         </ScenarioObject>
         <ScenarioObject name="Agent1">
@@ -94,12 +79,14 @@
                     <PrivateAction>
                         <TeleportAction>
                             <Position>
-                                <LanePosition roadId="144" laneId="-1" s="10.0" offset="0.0" />
+                                <LanePosition roadId="144" laneId="-1" s="15.0" offset="0.0" />
                             </Position>
                         </TeleportAction>
                     </PrivateAction>
                     <PrivateAction>
-                        <ActivateControllerAction lateral="true" longitudinal="true" />
+                        <ControllerAction>
+                            <ActivateControllerAction lateral="true" longitudinal="true" />
+                        </ControllerAction>
                     </PrivateAction>
                     <PrivateAction>
                         <RoutingAction>
@@ -125,7 +112,7 @@
                     <PrivateAction>
                         <TeleportAction>
                             <Position>
-                                <LanePosition roadId="144" laneId="-1" s="$Agent2_S"
+                                <LanePosition roadId="144" laneId="-2" s="$Agent2_S"
                                     offset="${-$Agent2_Offset}" />
                             </Position>
                         </TeleportAction>
@@ -157,7 +144,9 @@
                             </Action>
                             <Action name="Agent1_ActivateController">
                                 <PrivateAction>
-                                    <ActivateControllerAction lateral="true" longitudinal="true" />
+                                    <ControllerAction>
+                                        <ActivateControllerAction lateral="true" longitudinal="true" />
+                                    </ControllerAction>
                                 </PrivateAction>
                             </Action>
                             <StartTrigger>
@@ -394,7 +383,9 @@
                             </Action>
                             <Action name="Agent2_ActivateController">
                                 <PrivateAction>
-                                    <ActivateControllerAction lateral="true" longitudinal="true" />
+                                    <ControllerAction>
+                                        <ActivateControllerAction lateral="true" longitudinal="true" />
+                                    </ControllerAction>
                                 </PrivateAction>
                             </Action>
                             <StartTrigger>
@@ -518,9 +509,9 @@
                             maximumExecutionCount="1">
                             <Action name="Set EgoHasMoved Flag">
                                 <GlobalAction>
-                                    <ParameterAction parameterRef="AV_CONNECTED">
+                                    <VariableAction variableRef="AV_CONNECTED">
                                         <SetAction value="true" />
-                                    </ParameterAction>
+                                    </VariableAction>
                                 </GlobalAction>
                             </Action>
                             <StartTrigger>
@@ -542,9 +533,9 @@
                             maximumExecutionCount="1">
                             <Action name="Set Valid Flag">
                                 <GlobalAction>
-                                    <ParameterAction parameterRef="IS_VALID">
+                                    <VariableAction variableRef="IS_VALID">
                                         <SetAction value="true" />
-                                    </ParameterAction>
+                                    </VariableAction>
                                 </GlobalAction>
                             </Action>
                             <StartTrigger>
@@ -598,9 +589,9 @@
                             maximumExecutionCount="1">
                             <Action name="Set AV Connection Timeout Flag">
                                 <GlobalAction>
-                                    <ParameterAction parameterRef="AV_CONNECTION_TIMEOUT">
+                                    <VariableAction variableRef="AV_CONNECTION_TIMEOUT">
                                         <SetAction value="true" />
-                                    </ParameterAction>
+                                    </VariableAction>
                                 </GlobalAction>
                             </Action>
                             <StartTrigger>
@@ -624,9 +615,9 @@
                             maximumExecutionCount="1">
                             <Action name="Set High Start Speed Flag">
                                 <GlobalAction>
-                                    <ParameterAction parameterRef="WRONG_START_SPEED">
+                                    <VariableAction variableRef="WRONG_START_SPEED">
                                         <SetAction value="true" />
-                                    </ParameterAction>
+                                    </VariableAction>
                                 </GlobalAction>
                             </Action>
                             <StartTrigger>
@@ -667,9 +658,9 @@
                             maximumExecutionCount="1">
                             <Action name="Set Low Start Speed Flag">
                                 <GlobalAction>
-                                    <ParameterAction parameterRef="WRONG_START_SPEED">
+                                    <VariableAction variableRef="WRONG_START_SPEED">
                                         <SetAction value="true" />
-                                    </ParameterAction>
+                                    </VariableAction>
                                 </GlobalAction>
                             </Action>
                             <StartTrigger>
@@ -710,9 +701,9 @@
                             maximumExecutionCount="1">
                             <Action name="Set Ego Reached End Flag">
                                 <GlobalAction>
-                                    <ParameterAction parameterRef="EGO_REACHED_END">
+                                    <VariableAction variableRef="EGO_REACHED_END">
                                         <SetAction value="true" />
-                                    </ParameterAction>
+                                    </VariableAction>
                                 </GlobalAction>
                             </Action>
                             <StartTrigger>
@@ -740,9 +731,9 @@
                             maximumExecutionCount="1">
                             <Action name="Set Ego TLE Flag">
                                 <GlobalAction>
-                                    <ParameterAction parameterRef="EGO_TLE">
+                                    <VariableAction variableRef="EGO_TLE">
                                         <SetAction value="true" />
-                                    </ParameterAction>
+                                    </VariableAction>
                                 </GlobalAction>
                             </Action>
                             <StartTrigger>
@@ -769,9 +760,9 @@
                             maximumExecutionCount="1">
                             <Action name="Set Ego Collision Flag">
                                 <GlobalAction>
-                                    <ParameterAction parameterRef="EGO_COLLISION">
+                                    <VariableAction variableRef="EGO_COLLISION">
                                         <SetAction value="true" />
-                                    </ParameterAction>
+                                    </VariableAction>
                                 </GlobalAction>
                             </Action>
                             <StartTrigger>
@@ -795,9 +786,9 @@
                         <Event name="EgoStrollEvent" priority="parallel" maximumExecutionCount="1">
                             <Action name="Set Ego Stroll Flag">
                                 <GlobalAction>
-                                    <ParameterAction parameterRef="EGO_STROLL">
+                                    <VariableAction variableRef="EGO_STROLL">
                                         <SetAction value="true" />
-                                    </ParameterAction>
+                                    </VariableAction>
                                 </GlobalAction>
                             </Action>
                             <StartTrigger>
@@ -879,4 +870,15 @@
             </ConditionGroup>
         </StopTrigger>
     </Storyboard>
+    <VariableDeclarations>
+        <VariableDeclaration name="AV_CONNECTED" variableType="boolean" value="false" />
+        <VariableDeclaration name="EVENT_START" variableType="boolean" value="false" />
+        <VariableDeclaration name="IS_VALID" variableType="boolean" value="false" />
+        <VariableDeclaration name="AV_CONNECTION_TIMEOUT" variableType="boolean" value="false" />
+        <VariableDeclaration name="WRONG_START_SPEED" variableType="boolean" value="false" />
+        <VariableDeclaration name="EGO_REACHED_END" variableType="boolean" value="false" />
+        <VariableDeclaration name="EGO_TLE" variableType="boolean" value="false" />
+        <VariableDeclaration name="EGO_COLLISION" variableType="boolean" value="false" />
+        <VariableDeclaration name="EGO_STROLL" variableType="boolean" value="false" />
+    </VariableDeclarations>
 </OpenSCENARIO>
