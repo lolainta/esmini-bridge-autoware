@@ -6,7 +6,6 @@ using namespace std::chrono_literals;
 
 AutowareHandler::AutowareHandler()
     : Node("AutowareHandler"), ego_state(EgoState::UNKNOWN) {
-
     this->pub_initialpose_ =
         this->create_publisher<geometry_msgs::msg::PoseWithCovarianceStamped>(
             "/initialpose", 10);

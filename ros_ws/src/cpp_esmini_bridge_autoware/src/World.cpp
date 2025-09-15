@@ -60,7 +60,9 @@ void World::esmini_init() {
     // std::string xosc = "/resources/xosc/yusheng/145.xosc";
     std::string xosc =
         "/resources/xosc/chengyu/para_test01FR-ZZ_02FR-CI_2.xosc";
-    assert(SE_Init(xosc.c_str(), 1, 1, 0, 1) == 0);
+    assert(SE_Init(xosc.c_str(), 1, 0, 0, 1) == 0);
+    int index = SE_GetPermutationIndex();
+    RCLCPP_INFO(this->get_logger(), "Permutation Index: %d", index);
     SE_GetObjectState(0, &this->objectState);
     this->vehicleHandle = SE_SimpleVehicleCreate(
         this->objectState.x, this->objectState.y, this->objectState.h,
@@ -75,10 +77,6 @@ void World::esmini_close() {
 }
 
 void World::timer_callback() {
-    RCLCPP_INFO_THROTTLE(this->get_logger(), *this->get_clock(), 3000,
-                         "World State: %d",
-                         static_cast<int>(this->world_state));
-
     switch (this->world_state) {
     case WorldState::AV_CONNECTING:
         if (this->ego->get_state() != EgoState::UNKNOWN) {
@@ -104,16 +102,19 @@ void World::timer_callback() {
         break;
     case WorldState::RUNNING:
         if (SE_GetQuitFlag()) {
-            this->ego->stop();
+            limiter.call([this] { this->ego->stop(); });
             this->world_state = WorldState::STOPPED;
         }
         this->tick();
         break;
     case WorldState::STOPPED:
-        RCLCPP_INFO(this->get_logger(), "WorldState: STOPPED");
-        esmini_close();
-        this->world_state = WorldState::AV_CONNECTING;
-        esmini_init();
+        if (this->ego->get_state() != EgoState::DRIVING) {
+            RCLCPP_INFO(this->get_logger(),
+                        "WorldState: STOPPED -> AV_CONNECTING");
+            this->world_state = WorldState::AV_CONNECTING;
+            esmini_close();
+            esmini_init();
+        }
         break;
     default:
         break;
@@ -144,11 +145,11 @@ void World::tick() {
                           "Number of objects: %d", SE_GetNumberOfObjects());
     for (int i = 1; i < SE_GetNumberOfObjects(); i++) {
         SE_GetObjectState(SE_GetId(i), &this->objectState);
-        RCLCPP_INFO_THROTTLE(this->get_logger(), *this->get_clock(), 5000,
-                             "Object %d: %f, %f, %f, Speed: %f",
-                             this->objectState.id, this->objectState.x,
-                             this->objectState.y, this->objectState.h,
-                             this->objectState.speed);
+        RCLCPP_DEBUG_THROTTLE(this->get_logger(), *this->get_clock(), 5000,
+                              "Object %d: %f, %f, %f, Speed: %f",
+                              this->objectState.id, this->objectState.x,
+                              this->objectState.y, this->objectState.h,
+                              this->objectState.speed);
         this->ego->set_object(this->objectState.id, this->objectState.x,
                               this->objectState.y, this->objectState.h,
                               this->objectState.speed);
