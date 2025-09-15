@@ -7,17 +7,17 @@ using namespace std::chrono_literals;
 AutowareHandler::AutowareHandler()
     : Node("AutowareHandler"), ego_state(EgoState::UNKNOWN) {
 
-    this->initialpose_publisher_ =
+    this->pub_initialpose_ =
         this->create_publisher<geometry_msgs::msg::PoseWithCovarianceStamped>(
             "/initialpose", 10);
-    this->goalpose_publisher_ =
+    this->pub_goalpose_ =
         this->create_publisher<geometry_msgs::msg::PoseStamped>(
             "/planning/mission_planning/goal", 10);
 
-    this->engage_autoware_client_ =
+    this->cli_engage_ =
         this->create_client<autoware_adapi_v1_msgs::srv::ChangeOperationMode>(
             "/api/operation_mode/change_to_autonomous");
-    this->stop_autoware_client_ =
+    this->cli_stop_ =
         this->create_client<autoware_adapi_v1_msgs::srv::ChangeOperationMode>(
             "/api/operation_mode/change_to_stop");
 
@@ -142,7 +142,7 @@ void AutowareHandler::publish_initialpose_(float x, float y, float h) {
     initialpose.pose.covariance[6 * 5 + 5] = 0.06853891945200965;
     RCLCPP_INFO(this->get_logger(), "Publishing initialpose... %f %f %f", x, y,
                 h);
-    this->initialpose_publisher_->publish(initialpose);
+    this->pub_initialpose_->publish(initialpose);
 }
 
 void AutowareHandler::publish_goalpose_(float x, float y, float h) {
@@ -157,7 +157,7 @@ void AutowareHandler::publish_goalpose_(float x, float y, float h) {
     goalpose.pose.orientation.z = sin(h / 2);
     goalpose.pose.orientation.w = cos(h / 2);
     RCLCPP_INFO(this->get_logger(), "Publishing goalpose... %f %f %f", x, y, h);
-    this->goalpose_publisher_->publish(goalpose);
+    this->pub_goalpose_->publish(goalpose);
 }
 
 void AutowareHandler::engage_autoware_() {
@@ -168,7 +168,7 @@ void AutowareHandler::engage_autoware_() {
     }
     auto request = std::make_shared<
         autoware_adapi_v1_msgs::srv::ChangeOperationMode::Request>();
-    auto future = this->engage_autoware_client_->async_send_request(
+    auto future = this->cli_engage_->async_send_request(
         request,
         [this](
             rclcpp::Client<autoware_adapi_v1_msgs::srv::ChangeOperationMode>::
@@ -187,7 +187,7 @@ void AutowareHandler::engage_autoware_() {
 void AutowareHandler::stop_autoware_() {
     auto request = std::make_shared<
         autoware_adapi_v1_msgs::srv::ChangeOperationMode::Request>();
-    auto future = this->stop_autoware_client_->async_send_request(
+    auto future = this->cli_stop_->async_send_request(
         request,
         [this](
             rclcpp::Client<autoware_adapi_v1_msgs::srv::ChangeOperationMode>::

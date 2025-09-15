@@ -66,13 +66,12 @@ class AutowareHandler : public rclcpp::Node {
     float rotation = 0.0;
 
     rclcpp::Publisher<geometry_msgs::msg::PoseWithCovarianceStamped>::SharedPtr
-        initialpose_publisher_;
-    rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr
-        goalpose_publisher_;
+        pub_initialpose_;
+    rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr pub_goalpose_;
     rclcpp::Client<autoware_adapi_v1_msgs::srv::ChangeOperationMode>::SharedPtr
-        engage_autoware_client_;
+        cli_engage_;
     rclcpp::Client<autoware_adapi_v1_msgs::srv::ChangeOperationMode>::SharedPtr
-        stop_autoware_client_;
+        cli_stop_;
 
     rclcpp::Publisher<autoware_vehicle_msgs::msg::ControlModeReport>::SharedPtr
         pub_control_mode_;
