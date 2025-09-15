@@ -44,6 +44,10 @@ AutowareHandler::AutowareHandler()
         this->create_publisher<nav_msgs::msg::Odometry>(
             "/localization/kinematic_state", 10);
 
+    this->pub_max_velocity_ = this->create_publisher<
+        autoware_internal_planning_msgs::msg::VelocityLimit>(
+        "/planning/scenario_planning/max_velocity", 10);
+
     this->pub_predicted_objects_ =
         this->create_publisher<autoware_perception_msgs::msg::PredictedObjects>(
             "/perception/object_recognition/objects", 10);
@@ -291,6 +295,13 @@ void AutowareHandler::publish_kinematic_state_() {
     this->pub_kinematic_state_->publish(kinematic_state);
 }
 
+void AutowareHandler::publish_max_velocity_(double velocity_limit) {
+    autoware_internal_planning_msgs::msg::VelocityLimit max_velocity;
+    // max_velocity.stamp = this->now();
+    max_velocity.max_velocity = velocity_limit;
+    this->pub_max_velocity_->publish(max_velocity);
+}
+
 void AutowareHandler::set_object(int id, float x, float y, float h, float v) {
     autoware_perception_msgs::msg::PredictedObject predict_obj;
     autoware_perception_msgs::msg::ObjectClassification classification;
@@ -408,6 +419,8 @@ void AutowareHandler::timer_callback() {
     this->publish_pose_();
     this->publish_imu_state_();
     this->publish_kinematic_state_();
+
+    this->publish_max_velocity_();
 
     this->publish_objects_();
 }
