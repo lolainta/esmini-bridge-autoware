@@ -125,7 +125,7 @@ class AutowareHandler : public rclcpp::Node {
     void publish_imu_state_();
     void publish_kinematic_state_();
 
-    void publish_max_velocity_(double velocity_limit = 60.0 / 3.6);
+    void publish_max_velocity_(double);
 
     void publish_objects_();
 

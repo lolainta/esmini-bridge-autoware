@@ -420,7 +420,7 @@ void AutowareHandler::timer_callback() {
     this->publish_imu_state_();
     this->publish_kinematic_state_();
 
-    this->publish_max_velocity_();
+    this->publish_max_velocity_(30 / 3.6);
 
     this->publish_objects_();
 }
