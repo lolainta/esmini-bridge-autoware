@@ -31,6 +31,7 @@ build_all:
 
 
 launch map:
+  just config_params
   {{source_aw}} && ros2 launch autoware_launch \
     autoware.launch.xml \
     map_path:=/resources/osm/ \
