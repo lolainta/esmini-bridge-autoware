@@ -4,6 +4,7 @@
 
 #include "autoware_adapi_v1_msgs/srv/change_operation_mode.hpp"
 #include "autoware_control_msgs/msg/control.hpp"
+#include "autoware_internal_planning_msgs/msg/velocity_limit.hpp"
 #include "autoware_perception_msgs/msg/detected_objects.hpp"
 #include "autoware_perception_msgs/msg/object_classification.hpp"
 #include "autoware_perception_msgs/msg/predicted_objects.hpp"
@@ -89,6 +90,9 @@ class AutowareHandler : public rclcpp::Node {
     rclcpp::Publisher<sensor_msgs::msg::Imu>::SharedPtr pub_imu_state_;
     rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr pub_kinematic_state_;
 
+    rclcpp::Publisher<autoware_internal_planning_msgs::msg::VelocityLimit>::
+        SharedPtr pub_max_velocity_;
+
     rclcpp::Publisher<autoware_perception_msgs::msg::PredictedObjects>::
         SharedPtr pub_predicted_objects_;
 
@@ -120,6 +124,8 @@ class AutowareHandler : public rclcpp::Node {
     void publish_pose_();
     void publish_imu_state_();
     void publish_kinematic_state_();
+
+    void publish_max_velocity_(double);
 
     void publish_objects_();
 

@@ -129,7 +129,7 @@ void World::set_ego_route() {
     this->ego->set_initial_pose(ego_pose.x, ego_pose.y, ego_pose.h);
     // this->ego->set_goal_pose(6.5, 299.6, 1.57);
     // this->ego->set_goal_pose(52.5, 11.6, 6.28);
-    this->ego->set_goal_pose(678.5, -28.6, 1.7);
+    this->ego->set_goal_pose(672, 41.6, 1.66);
 }
 
 void World::tick() {
