@@ -2,14 +2,14 @@
 <OpenSCENARIO xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="OpenScenario.xsd">
     <FileHeader description="hct_01FR-ZZ_02FR-CI_2" author="HCIS_ChengYuSheng" revMajor="1"
-        revMinor="2" date="2025-09-15T15:44:52.920312" />
+        revMinor="2" date="2025-09-15T16:26:46.590337" />
     <ParameterDeclarations>
         <ParameterDeclaration name="Ego_Vehicle" parameterType="string" value="car_white" />
-        <ParameterDeclaration name="Ego_Speed" parameterType="double" value="30" />
+        <ParameterDeclaration name="Ego_Speed" parameterType="double" value="15" />
         <ParameterDeclaration name="Ego_S" parameterType="double" value="15" />
         <ParameterDeclaration name="Agent1_Type" parameterType="string" value="car_red" />
         <ParameterDeclaration name="Agent1_Speed" parameterType="double" value="0" />
-        <ParameterDeclaration name="Agent1_S" parameterType="double" value="90" />
+        <ParameterDeclaration name="Agent1_S" parameterType="double" value="57" />
         <ParameterDeclaration name="Agent1_Offset" parameterType="double" value="0" />
         <ParameterDeclaration name="Agent1_1_Delay" parameterType="double" value="0" />
         <ParameterDeclaration name="Agent1_1_TA_Offset" parameterType="double" value="1.5" />
@@ -21,7 +21,7 @@
         <ParameterDeclaration name="Agent1_1_SA_EndSpeed" parameterType="double" value="40" />
         <ParameterDeclaration name="Agent2_Type" parameterType="string" value="bicycle" />
         <ParameterDeclaration name="Agent2_Speed" parameterType="double" value="0" />
-        <ParameterDeclaration name="Agent2_S" parameterType="double" value="90" />
+        <ParameterDeclaration name="Agent2_S" parameterType="double" value="57" />
         <ParameterDeclaration name="Agent2_Offset" parameterType="double" value="-1.5" />
         <ParameterDeclaration name="Agent2_1_Delay" parameterType="double" value="0" />
         <ParameterDeclaration name="Agent2_1_TA_Offset" parameterType="double" value="0" />
@@ -52,7 +52,13 @@
         <ScenarioObject name="Ego">
             <CatalogReference catalogName="VehicleCatalog" entryName="$Ego_Vehicle" />
             <ObjectController>
-                <CatalogReference catalogName="ControllerCatalog" entryName="ACCController" />
+                <Controller name="ACCController">
+                    <Properties>
+                        <Property name="timeGap" value="1.0" />
+                        <Property name="mode" value="override" />
+                        <Property name="setSpeed" value="${$Ego_Speed / 3.6}" />
+                    </Properties>
+                </Controller>
             </ObjectController>
         </ScenarioObject>
         <ScenarioObject name="Agent1">
@@ -79,7 +85,7 @@
                     <PrivateAction>
                         <TeleportAction>
                             <Position>
-                                <LanePosition roadId="144" laneId="-1" s="15.0" offset="0.0" />
+                                <LanePosition roadId="144" laneId="-1" s="1.0" offset="0.0" />
                             </Position>
                         </TeleportAction>
                     </PrivateAction>
@@ -96,6 +102,17 @@
                                 </Position>
                             </AcquirePositionAction>
                         </RoutingAction>
+                    </PrivateAction>
+                    <PrivateAction>
+                        <LongitudinalAction>
+                            <SpeedAction>
+                                <SpeedActionDynamics dynamicsShape="step" value="0.0"
+                                    dynamicsDimension="time" />
+                                <SpeedActionTarget>
+                                    <AbsoluteTargetSpeed value="${$Ego_Speed / 3.6}" />
+                                </SpeedActionTarget>
+                            </SpeedAction>
+                        </LongitudinalAction>
                     </PrivateAction>
                 </Private>
                 <Private entityRef="Agent1">
@@ -154,7 +171,7 @@
                                     <Condition name="IS_VALID_Trigger" delay="0.0"
                                         conditionEdge="rising">
                                         <ByValueCondition>
-                                            <ParameterCondition parameterRef="IS_VALID" value="true"
+                                            <VariableCondition variableRef="IS_VALID" value="true"
                                                 rule="equalTo" />
                                         </ByValueCondition>
                                     </Condition>
@@ -393,7 +410,7 @@
                                     <Condition name="IS_VALID_Trigger" delay="0.0"
                                         conditionEdge="rising">
                                         <ByValueCondition>
-                                            <ParameterCondition parameterRef="IS_VALID" value="true"
+                                            <VariableCondition variableRef="IS_VALID" value="true"
                                                 rule="equalTo" />
                                         </ByValueCondition>
                                     </Condition>
@@ -516,7 +533,7 @@
                             </Action>
                             <StartTrigger>
                                 <ConditionGroup>
-                                    <Condition name="EgoHasMoved" delay="0.0" conditionEdge="rising">
+                                    <Condition name="EgoHasMoved" delay="0.0" conditionEdge="none">
                                         <ByEntityCondition>
                                             <TriggeringEntities triggeringEntitiesRule="any">
                                                 <EntityRef entityRef="Ego" />
@@ -550,7 +567,7 @@
                                                 <ReachPositionCondition tolerance="2.0">
                                                     <Position>
                                                         <LanePosition roadId="144" laneId="-1"
-                                                            s="50.0" offset="0.0" />
+                                                            s="17.0" offset="0.0" />
                                                     </Position>
                                                 </ReachPositionCondition>
                                             </EntityCondition>
@@ -604,7 +621,7 @@
                                     <Condition name="EgoHasNotMoved" delay="0.0"
                                         conditionEdge="none">
                                         <ByValueCondition>
-                                            <ParameterCondition parameterRef="AV_CONNECTED"
+                                            <VariableCondition variableRef="AV_CONNECTED"
                                                 value="false" rule="equalTo" />
                                         </ByValueCondition>
                                     </Condition>
@@ -632,7 +649,7 @@
                                                 <ReachPositionCondition tolerance="2.0">
                                                     <Position>
                                                         <LanePosition roadId="144" laneId="-1"
-                                                            s="50.0" offset="0.0" />
+                                                            s="17.0" offset="0.0" />
                                                     </Position>
                                                 </ReachPositionCondition>
                                             </EntityCondition>
@@ -675,7 +692,7 @@
                                                 <ReachPositionCondition tolerance="2.0">
                                                     <Position>
                                                         <LanePosition roadId="144" laneId="-1"
-                                                            s="50.0" offset="0.0" />
+                                                            s="17.0" offset="0.0" />
                                                     </Position>
                                                 </ReachPositionCondition>
                                             </EntityCondition>
@@ -747,7 +764,7 @@
                                                 <ReachPositionCondition tolerance="2.0">
                                                     <Position>
                                                         <LanePosition roadId="144" laneId="-1"
-                                                            s="50.0" offset="0.0" />
+                                                            s="17.0" offset="0.0" />
                                                     </Position>
                                                 </ReachPositionCondition>
                                             </EntityCondition>
@@ -795,14 +812,14 @@
                                 <ConditionGroup>
                                     <Condition name="EgoStroll" delay="20.0" conditionEdge="none">
                                         <ByValueCondition>
-                                            <ParameterCondition parameterRef="AV_CONNECTED"
+                                            <VariableCondition variableRef="AV_CONNECTED"
                                                 value="true" rule="equalTo" />
                                         </ByValueCondition>
                                     </Condition>
                                     <Condition name="EventStarted" delay="0.0" conditionEdge="none">
                                         <ByValueCondition>
-                                            <ParameterCondition parameterRef="IS_VALID"
-                                                value="false" rule="equalTo" />
+                                            <VariableCondition variableRef="IS_VALID" value="false"
+                                                rule="equalTo" />
                                         </ByValueCondition>
                                     </Condition>
                                 </ConditionGroup>
@@ -826,7 +843,7 @@
             <ConditionGroup>
                 <Condition name="AV_CONNECTION_TIMEOUT_Trigger" delay="0.0" conditionEdge="rising">
                     <ByValueCondition>
-                        <ParameterCondition parameterRef="AV_CONNECTION_TIMEOUT" value="true"
+                        <VariableCondition variableRef="AV_CONNECTION_TIMEOUT" value="true"
                             rule="equalTo" />
                     </ByValueCondition>
                 </Condition>
@@ -834,7 +851,7 @@
             <ConditionGroup>
                 <Condition name="WRONG_START_SPEED_Trigger" delay="0.0" conditionEdge="rising">
                     <ByValueCondition>
-                        <ParameterCondition parameterRef="WRONG_START_SPEED" value="true"
+                        <VariableCondition variableRef="WRONG_START_SPEED" value="true"
                             rule="equalTo" />
                     </ByValueCondition>
                 </Condition>
@@ -842,29 +859,28 @@
             <ConditionGroup>
                 <Condition name="EGO_REACHED_END_Trigger" delay="0.0" conditionEdge="rising">
                     <ByValueCondition>
-                        <ParameterCondition parameterRef="EGO_REACHED_END" value="true"
-                            rule="equalTo" />
+                        <VariableCondition variableRef="EGO_REACHED_END" value="true" rule="equalTo" />
                     </ByValueCondition>
                 </Condition>
             </ConditionGroup>
             <ConditionGroup>
                 <Condition name="EGO_TLE_Trigger" delay="0.0" conditionEdge="rising">
                     <ByValueCondition>
-                        <ParameterCondition parameterRef="EGO_TLE" value="true" rule="equalTo" />
+                        <VariableCondition variableRef="EGO_TLE" value="true" rule="equalTo" />
                     </ByValueCondition>
                 </Condition>
             </ConditionGroup>
             <ConditionGroup>
                 <Condition name="EGO_COLLISION_Trigger" delay="0.0" conditionEdge="rising">
                     <ByValueCondition>
-                        <ParameterCondition parameterRef="EGO_COLLISION" value="true" rule="equalTo" />
+                        <VariableCondition variableRef="EGO_COLLISION" value="true" rule="equalTo" />
                     </ByValueCondition>
                 </Condition>
             </ConditionGroup>
             <ConditionGroup>
                 <Condition name="EGO_STROLL_Trigger" delay="0.0" conditionEdge="rising">
                     <ByValueCondition>
-                        <ParameterCondition parameterRef="EGO_STROLL" value="true" rule="equalTo" />
+                        <VariableCondition variableRef="EGO_STROLL" value="true" rule="equalTo" />
                     </ByValueCondition>
                 </Condition>
             </ConditionGroup>
@@ -872,7 +888,6 @@
     </Storyboard>
     <VariableDeclarations>
         <VariableDeclaration name="AV_CONNECTED" variableType="boolean" value="false" />
-        <VariableDeclaration name="EVENT_START" variableType="boolean" value="false" />
         <VariableDeclaration name="IS_VALID" variableType="boolean" value="false" />
         <VariableDeclaration name="AV_CONNECTION_TIMEOUT" variableType="boolean" value="false" />
         <VariableDeclaration name="WRONG_START_SPEED" variableType="boolean" value="false" />
