@@ -20,7 +20,7 @@ clean:
 
 run xosc:
   {{source_ros}} && {{source_aw}} && {{source_ws}} && \
-    ros2 launch cpp_esmini_bridge_autoware main.yaml xosc:="{{xosc}}"
+    ros2 launch cpp_esmini_bridge_autoware main.yaml xosc:="{{xosc}}" headless:=true
 
 debug: build
   {{source_ros}} && {{source_ws}} && \

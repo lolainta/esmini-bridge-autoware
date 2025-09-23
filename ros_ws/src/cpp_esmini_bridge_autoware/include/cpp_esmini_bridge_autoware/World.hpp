@@ -32,6 +32,7 @@ class World : public rclcpp::Node {
     SE_ScenarioObjectState objectState;
 
     std::string xosc;
+    bool headless;
 
     void esmini_opts();
     void esmini_init();
