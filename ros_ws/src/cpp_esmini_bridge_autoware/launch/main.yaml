@@ -26,9 +26,17 @@ launch:
   - arg:
       name: "occupancy_grid_map_updater"
       default: "binary_bayes_filter"
+  - arg:
+      name: "xosc"
+      default: "launchfile default xosc not overridden"
   - node:
       pkg: cpp_esmini_bridge_autoware
       exec: esmini-bridge-autoware
+      param:
+        - name: "xosc"
+          value: "$(var xosc)"
+        - name: "headless"
+          value: false
   - group:
       if: $(var launch_simulator_perception_modules)
       children:

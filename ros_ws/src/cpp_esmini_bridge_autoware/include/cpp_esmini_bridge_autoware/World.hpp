@@ -31,6 +31,9 @@ class World : public rclcpp::Node {
     SE_SimpleVehicleState vehicleState = {0, 0, 0, 0, 0, 0, 0, 0};
     SE_ScenarioObjectState objectState;
 
+    std::string xosc;
+    bool headless;
+
     void esmini_opts();
     void esmini_init();
     void esmini_close();

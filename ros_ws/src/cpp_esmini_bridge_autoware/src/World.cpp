@@ -38,6 +38,12 @@ void parameter_callback(void *) {
 World::World()
     : Node("World"), world_state(WorldState::AV_CONNECTING), limiter(10s) {
     RCLCPP_INFO(this->get_logger(), "World Node Initialized");
+
+    this->declare_parameter("xosc", "default parameter not overridden");
+    this->declare_parameter("headless", true);
+    this->xosc = this->get_parameter("xosc").as_string();
+    this->headless = this->get_parameter("headless").as_bool();
+
     this->esmini_init();
     RCLCPP_INFO(this->get_logger(), "Esmini Initialized");
     this->ego = std::make_shared<AutowareHandler>();
@@ -58,9 +64,14 @@ void World::esmini_init() {
     // std::string xosc = "/esmini/resources/xosc/cut-in.xosc";
     // std::string xosc = "/resources/xosc/chengyu/SinD_test1.xosc";
     // std::string xosc = "/resources/xosc/yusheng/145.xosc";
-    std::string xosc =
-        "/resources/xosc/chengyu/para_test01FR-ZZ_02FR-CI_2.xosc";
-    assert(SE_Init(xosc.c_str(), 1, 0, 0, 1) == 0);
+    RCLCPP_INFO(this->get_logger(), "Loading XOSC: %s", this->xosc.c_str());
+    RCLCPP_INFO(this->get_logger(), "Headless mode: %s",
+                this->headless ? "true" : "false");
+    if (this->headless) {
+        assert(SE_Init(this->xosc.c_str(), 1, 0, 0, 1) == 0);
+    } else {
+        assert(SE_Init(this->xosc.c_str(), 1, 1, 0, 1) == 0);
+    }
     int index = SE_GetPermutationIndex();
     RCLCPP_INFO(this->get_logger(), "Permutation Index: %d", index);
     SE_GetObjectState(0, &this->objectState);

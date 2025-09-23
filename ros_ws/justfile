@@ -4,9 +4,9 @@ source_ros := 'source /opt/ros/humble/setup.bash'
 source_ws := 'source ./install/setup.bash'
 source_aw := 'source /autoware/install/setup.bash'
 
-default:
+default xosc:
   just build
-  just run
+  just run {{xosc}}
 
 deps:
   apt update
@@ -18,14 +18,9 @@ build:
 clean:
   rm -rf install/ build/ log/
 
-run:
+run xosc:
   {{source_ros}} && {{source_aw}} && {{source_ws}} && \
-    ros2 launch cpp_esmini_bridge_autoware main.yaml
-
-test:
-  {{source_ros}} && {{source_aw}} && {{source_ws}} && \
-    ros2 launch cpp_esmini_bridge_autoware test.yaml
-
+    ros2 launch cpp_esmini_bridge_autoware main.yaml xosc:="{{xosc}}" headless:=true
 
 debug: build
   {{source_ros}} && {{source_ws}} && \
