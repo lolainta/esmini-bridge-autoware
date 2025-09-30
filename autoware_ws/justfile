@@ -47,7 +47,8 @@ launch map:
     launch_dummy_diag_publisher:=true \
     diagnostic_graph_aggregator_graph_path:={{autoware_launch_pkg}}/config/system/diagnostics/autoware-main.yaml \
     enable_all_modules_auto_mode:=true \
-    is_simulation:=true
+    is_simulation:=true \
+    rviz:=false
 
 sample map:
   just config_params
