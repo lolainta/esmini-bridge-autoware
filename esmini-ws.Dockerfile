@@ -14,6 +14,16 @@ apt-get install -y --no-install-recommends \
 rm -rf /var/lib/apt/lists/*
 EOF
 
-RUN cmake -B build/ -S . && cmake --build build/ --config Release --target install -j
+RUN <<EOF
+cmake -B build/ -S . \
+  -DENABLE_COLORED_DIAGNOSTICS=ON \
+  -DENABLE_WARNINGS_AS_ERRORS=ON \
+  -DDOWNLOAD_EXTERNALS=OFF \
+  -DENABLE_CCACHE=ON \
+  -DBUILD_EXAMPLES=OFF \
+  -DUSE_IMPLOT=OFF \
+  -DUSE_OSG=OFF -DUSE_OSI=OFF -DUSE_SUMO=OFF -DUSE_GTEST=OFF
+cmake --build build/ --config Release --target install -j
+EOF
 
 WORKDIR /ros_ws
