@@ -36,7 +36,7 @@ launch:
         - name: "xosc"
           value: "$(var xosc)"
         - name: "headless"
-          value: false
+          value: $(var headless)
   - group:
       if: $(var launch_simulator_perception_modules)
       children:
